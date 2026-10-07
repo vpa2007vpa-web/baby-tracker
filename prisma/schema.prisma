@@ -1,0 +1,248 @@
+// Prisma 7: connection URLs live in prisma.config.ts (CLI, DIRECT_URL) and
+// src/lib/db.ts (app, DATABASE_URL through PrismaPg). See CLAUDE.md §2.6.
+
+generator client {
+  provider        = "prisma-client"
+  output          = "../src/generated/prisma"
+  // One active breast feeding / sleep session per baby is a DB invariant (CLAUDE.md §2.6).
+  previewFeatures = ["partialIndexes"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Household & access ──────────────────────────────────────────────────────
+
+enum HouseholdRole {
+  OWNER
+  MEMBER
+}
+
+model Household {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  members HouseholdMember[]
+  invites HouseholdInvite[]
+  babies  Baby[]
+
+  @@map("households")
+}
+
+model HouseholdMember {
+  id          String        @id @default(uuid()) @db.Uuid
+  householdId String        @map("household_id") @db.Uuid
+  /// Supabase Auth user id (auth.users.id). No FK: auth is not managed by Prisma.
+  /// Unique: in the MVP a user belongs to exactly one household.
+  userId      String        @unique @map("user_id") @db.Uuid
+  role        HouseholdRole @default(MEMBER)
+  displayName String        @map("display_name")
+  createdAt   DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  household Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+
+  @@index([householdId])
+  @@map("household_members")
+}
+
+model HouseholdInvite {
+  id          String    @id @default(uuid()) @db.Uuid
+  householdId String    @map("household_id") @db.Uuid
+  code        String    @unique
+  expiresAt   DateTime  @map("expires_at") @db.Timestamptz(3)
+  usedAt      DateTime? @map("used_at") @db.Timestamptz(3)
+  usedById    String?   @map("used_by_id") @db.Uuid
+  createdById String    @map("created_by_id") @db.Uuid
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  household Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+
+  @@index([householdId])
+  @@map("household_invites")
+}
+
+// ─── Baby ────────────────────────────────────────────────────────────────────
+
+enum BabySex {
+  FEMALE
+  MALE
+}
+
+model Baby {
+  id          String   @id @default(uuid()) @db.Uuid
+  householdId String   @map("household_id") @db.Uuid
+  name        String
+  birthDate   DateTime @map("birth_date") @db.Timestamptz(3)
+  sex         BabySex?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  household          Household           @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  feedings           Feeding[]
+  diaperChanges      DiaperChange[]
+  sleepSessions      SleepSession[]
+  growthMeasurements GrowthMeasurement[]
+  healthRecords      HealthRecord[]
+
+  @@index([householdId])
+  @@map("babies")
+}
+
+// ─── Baby records ────────────────────────────────────────────────────────────
+// All records: client-generated UUID id (idempotent creates), babyId with
+// cascade, createdById / updatedById (Supabase Auth user ids, "por Ana") and
+// a (babyId, <date>) index for day listings.
+
+enum FeedingType {
+  BREAST_LEFT
+  BREAST_RIGHT
+  BOTTLE
+}
+
+enum BottleContent {
+  BREAST_MILK
+  FORMULA
+}
+
+model Feeding {
+  id            String         @id @default(uuid()) @db.Uuid
+  babyId        String         @map("baby_id") @db.Uuid
+  type          FeedingType
+  startedAt     DateTime       @map("started_at") @db.Timestamptz(3)
+  /// null = breast feeding in progress (timer). Bottles are point-in-time.
+  endedAt       DateTime?      @map("ended_at") @db.Timestamptz(3)
+  amountMl      Int?           @map("amount_ml")
+  bottleContent BottleContent? @map("bottle_content")
+  notes         String?
+  createdById   String         @map("created_by_id") @db.Uuid
+  updatedById   String?        @map("updated_by_id") @db.Uuid
+  createdAt     DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  baby Baby @relation(fields: [babyId], references: [id], onDelete: Cascade)
+
+  @@unique([babyId], map: "feedings_one_active_breast_per_baby", where: raw("ended_at IS NULL AND type <> 'BOTTLE'"))
+  @@index([babyId, startedAt])
+  @@map("feedings")
+}
+
+enum DiaperType {
+  WET
+  DIRTY
+  MIXED
+}
+
+enum StoolColor {
+  BLACK
+  GREEN
+  YELLOW
+  ORANGE
+  BROWN
+  RED
+  PALE
+}
+
+enum StoolConsistency {
+  WATERY
+  SEEDY
+  SOFT
+  FORMED
+  HARD
+}
+
+model DiaperChange {
+  id               String            @id @default(uuid()) @db.Uuid
+  babyId           String            @map("baby_id") @db.Uuid
+  occurredAt       DateTime          @map("occurred_at") @db.Timestamptz(3)
+  type             DiaperType
+  stoolColor       StoolColor?       @map("stool_color")
+  stoolConsistency StoolConsistency? @map("stool_consistency")
+  notes            String?
+  createdById      String            @map("created_by_id") @db.Uuid
+  updatedById      String?           @map("updated_by_id") @db.Uuid
+  createdAt        DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  baby Baby @relation(fields: [babyId], references: [id], onDelete: Cascade)
+
+  @@index([babyId, occurredAt])
+  @@map("diaper_changes")
+}
+
+model SleepSession {
+  id          String    @id @default(uuid()) @db.Uuid
+  babyId      String    @map("baby_id") @db.Uuid
+  startedAt   DateTime  @map("started_at") @db.Timestamptz(3)
+  /// null = sleeping right now (timer).
+  endedAt     DateTime? @map("ended_at") @db.Timestamptz(3)
+  notes       String?
+  createdById String    @map("created_by_id") @db.Uuid
+  updatedById String?   @map("updated_by_id") @db.Uuid
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  baby Baby @relation(fields: [babyId], references: [id], onDelete: Cascade)
+
+  @@unique([babyId], map: "sleep_sessions_one_active_per_baby", where: { endedAt: null })
+  @@index([babyId, startedAt])
+  @@map("sleep_sessions")
+}
+
+model GrowthMeasurement {
+  id                  String   @id @default(uuid()) @db.Uuid
+  babyId              String   @map("baby_id") @db.Uuid
+  measuredAt          DateTime @map("measured_at") @db.Timestamptz(3)
+  weightGrams         Int?     @map("weight_grams")
+  lengthMm            Int?     @map("length_mm")
+  headCircumferenceMm Int?     @map("head_circumference_mm")
+  createdById         String   @map("created_by_id") @db.Uuid
+  updatedById         String?  @map("updated_by_id") @db.Uuid
+  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  baby Baby @relation(fields: [babyId], references: [id], onDelete: Cascade)
+
+  @@index([babyId, measuredAt])
+  @@map("growth_measurements")
+}
+
+enum HealthRecordKind {
+  VACCINE
+  MEDICATION
+}
+
+enum DoseUnit {
+  ML
+  MG
+  DROPS
+  PUFFS
+}
+
+model HealthRecord {
+  id             String           @id @default(uuid()) @db.Uuid
+  babyId         String           @map("baby_id") @db.Uuid
+  kind           HealthRecordKind
+  name           String
+  /// Float on purpose (e.g. 2.5 ml): the one exception to integer measures.
+  doseAmount     Float?           @map("dose_amount")
+  doseUnit       DoseUnit?        @map("dose_unit")
+  /// Position in a vaccine series (1st, 2nd… dose).
+  doseNumber     Int?             @map("dose_number")
+  administeredAt DateTime         @map("administered_at") @db.Timestamptz(3)
+  reaction       String?
+  notes          String?
+  createdById    String           @map("created_by_id") @db.Uuid
+  updatedById    String?          @map("updated_by_id") @db.Uuid
+  createdAt      DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  baby Baby @relation(fields: [babyId], references: [id], onDelete: Cascade)
+
+  @@index([babyId, administeredAt])
+  @@map("health_records")
+}

@@ -1,0 +1,10 @@
+.next/
+node_modules/
+src/generated/
+# shadcn/ui output stays as generated so `shadcn add --diff` remains readable.
+src/components/ui/
+package-lock.json
+# Hand-formatted Markdown.
+*.md
+docs/
+.claude/

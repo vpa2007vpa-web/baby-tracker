@@ -1,0 +1,89 @@
+import { TZDate } from "@date-fns/tz";
+import { addDays, format, startOfDay } from "date-fns";
+
+// All date logic takes the household time zone explicitly (env.APP_TIMEZONE on
+// the server): never the implicit zone of the machine (CLAUDE.md §2.5).
+// Isomorphic: client components use the relative formatters.
+
+const MINUTE_MS = 60_000;
+const HOUR_MINUTES = 60;
+const DAY_MS = 24 * HOUR_MINUTES * MINUTE_MS;
+
+export type DayRange = { start: Date; end: Date };
+
+/** Natural day containing `instant` in `timeZone`, as a half-open [start, end). */
+export function getDayRange(instant: Date, timeZone: string): DayRange {
+  const start = startOfDay(new TZDate(instant, timeZone));
+  // addDays on a TZDate lands on the next local midnight, so DST days last
+  // 23 or 25 hours as they should.
+  const end = addDays(start, 1);
+  return { start: new Date(start.getTime()), end: new Date(end.getTime()) };
+}
+
+const DATETIME_LOCAL = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/;
+
+/**
+ * Parses an `<input type="datetime-local">` value, which carries no zone,
+ * as a wall-clock time in `timeZone`. Returns null for malformed or
+ * impossible dates (e.g. Feb 31).
+ */
+export function parseDateTimeLocal(
+  value: string,
+  timeZone: string,
+): Date | null {
+  const match = DATETIME_LOCAL.exec(value);
+  if (!match) return null;
+  const [year, month, day, hours, minutes, seconds = 0] = match
+    .slice(1)
+    .map((part) => (part === undefined ? undefined : Number(part)));
+  if (
+    year === undefined ||
+    month === undefined ||
+    day === undefined ||
+    hours === undefined ||
+    minutes === undefined
+  ) {
+    return null;
+  }
+
+  const local = new TZDate(
+    year,
+    month - 1,
+    day,
+    hours,
+    minutes,
+    seconds,
+    timeZone,
+  );
+  if (local.getMonth() !== month - 1 || local.getDate() !== day) return null;
+  return new Date(local.getTime());
+}
+
+/** "14:30" — 24 h clock in the household time zone. */
+export function formatTime(instant: Date, timeZone: string): string {
+  return format(new TZDate(instant, timeZone), "HH:mm");
+}
+
+/** "25 min", "1 h", "1 h 20 min". Negative durations read as "0 min". */
+export function formatDuration(durationMs: number): string {
+  const totalMinutes = Math.max(0, Math.floor(durationMs / MINUTE_MS));
+  const hours = Math.floor(totalMinutes / HOUR_MINUTES);
+  const minutes = totalMinutes % HOUR_MINUTES;
+  if (hours === 0) return `${minutes} min`;
+  if (minutes === 0) return `${hours} h`;
+  return `${hours} h ${minutes} min`;
+}
+
+/**
+ * "ahora mismo", "hace 25 min", "hace 1 h 20 min", "hace 3 días".
+ * Render it from a client component that ticks, so the text stays fresh and
+ * server/client output never mismatch during hydration.
+ */
+export function formatTimeAgo(instant: Date, now: Date): string {
+  const elapsedMs = now.getTime() - instant.getTime();
+  // Future instants come from small clock drifts between devices.
+  if (elapsedMs < MINUTE_MS) return "ahora mismo";
+  if (elapsedMs < DAY_MS) return `hace ${formatDuration(elapsedMs)}`;
+  const days = Math.floor(elapsedMs / DAY_MS);
+  return days === 1 ? "hace 1 día" : `hace ${days} días`;
+}
