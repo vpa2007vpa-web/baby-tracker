@@ -131,7 +131,8 @@ export async function createHouseholdInvite(): Promise<
     });
 
     if (!invite) return actionError("CONFLICT", FULL_HOUSEHOLD_MESSAGE);
-    revalidatePath("/settings");
+    // "layout" also covers /settings/invite and the rest of Ajustes.
+    revalidatePath("/settings", "layout");
     return ok(invite);
   } catch (error) {
     return handleActionError("createHouseholdInvite", error);
