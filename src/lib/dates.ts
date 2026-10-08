@@ -72,6 +72,27 @@ export function formatTime(instant: Date, timeZone: string): string {
   return format(new TZDate(instant, timeZone), "HH:mm");
 }
 
+/** `<input type="date">` value ("2026-10-08") of `instant` in `timeZone`. */
+export function formatDateInputValue(instant: Date, timeZone: string): string {
+  return format(new TZDate(instant, timeZone), "yyyy-MM-dd");
+}
+
+/** "hoy a las 18:00", "mañana a las 12:30", "el 12/10 a las 09:00". */
+export function formatRelativeDayTime(
+  instant: Date,
+  now: Date,
+  timeZone: string,
+): string {
+  const time = formatTime(instant, timeZone);
+  const today = getDayRange(now, timeZone);
+  if (instant >= today.start && instant < today.end) return `hoy a las ${time}`;
+  const tomorrow = getDayRange(today.end, timeZone);
+  if (instant >= tomorrow.start && instant < tomorrow.end) {
+    return `mañana a las ${time}`;
+  }
+  return `el ${format(new TZDate(instant, timeZone), "dd/MM")} a las ${time}`;
+}
+
 /** "25 min", "1 h", "1 h 20 min". Negative durations read as "0 min". */
 export function formatDuration(durationMs: number): string {
   const totalMinutes = Math.max(0, Math.floor(durationMs / MINUTE_MS));

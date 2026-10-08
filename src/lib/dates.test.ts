@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  formatDateInputValue,
   formatDuration,
+  formatRelativeDayTime,
   formatTime,
   formatTimeAgo,
   getDayRange,
@@ -114,5 +116,55 @@ describe("formatTimeAgo", () => {
     [new Date(now.getTime() - 72 * HOUR), "hace 3 días"],
   ])("formats %s relative to now as %j", (date, expected) => {
     expect(formatTimeAgo(date, now)).toBe(expected);
+  });
+});
+
+describe("formatDateInputValue", () => {
+  it('returns the household-local date for <input type="date">', () => {
+    // 22:30 UTC on Oct 8 is already Oct 9 in Madrid (UTC+2).
+    expect(formatDateInputValue(new Date("2026-10-08T22:30:00Z"), MADRID)).toBe(
+      "2026-10-09",
+    );
+  });
+
+  it("keeps the same date when UTC and Madrid agree", () => {
+    expect(formatDateInputValue(new Date("2026-10-08T12:00:00Z"), MADRID)).toBe(
+      "2026-10-08",
+    );
+  });
+});
+
+describe("formatRelativeDayTime", () => {
+  // 14:00 on Oct 8 in Madrid.
+  const NOW = new Date("2026-10-08T12:00:00Z");
+
+  it("says hoy for a later time on the same household day", () => {
+    expect(
+      formatRelativeDayTime(new Date("2026-10-08T16:00:00Z"), NOW, MADRID),
+    ).toBe("hoy a las 18:00");
+  });
+
+  it("says mañana for the next household day", () => {
+    expect(
+      formatRelativeDayTime(new Date("2026-10-09T10:30:00Z"), NOW, MADRID),
+    ).toBe("mañana a las 12:30");
+  });
+
+  it("uses the household day, not the UTC day, around midnight", () => {
+    // 23:30 and 00:30 in Madrid, while both instants are Oct 8 in UTC.
+    const lateNight = new Date("2026-10-08T21:30:00Z");
+    expect(
+      formatRelativeDayTime(
+        new Date("2026-10-08T22:30:00Z"),
+        lateNight,
+        MADRID,
+      ),
+    ).toBe("mañana a las 00:30");
+  });
+
+  it("falls back to the date beyond tomorrow", () => {
+    expect(
+      formatRelativeDayTime(new Date("2026-10-12T07:00:00Z"), NOW, MADRID),
+    ).toBe("el 12/10 a las 09:00");
   });
 });
