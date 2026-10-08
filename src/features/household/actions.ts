@@ -131,8 +131,9 @@ export async function createHouseholdInvite(): Promise<
     });
 
     if (!invite) return actionError("CONFLICT", FULL_HOUSEHOLD_MESSAGE);
-    // "layout" also covers /settings/invite and the rest of Ajustes.
-    revalidatePath("/settings", "layout");
+    // Literal paths: /settings has no layout.tsx for a "layout" revalidation.
+    revalidatePath("/settings");
+    revalidatePath("/settings/invite");
     return ok(invite);
   } catch (error) {
     return handleActionError("createHouseholdInvite", error);

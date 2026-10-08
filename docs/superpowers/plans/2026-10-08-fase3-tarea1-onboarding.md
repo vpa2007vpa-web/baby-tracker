@@ -31,7 +31,7 @@
 ```
 
 - El enlace compartido **nunca** contiene el código: es una credencial al portador y en una URL acabaría en el historial y en los logs (decisión 034).
-- `createHouseholdInvite` revalida `revalidatePath("/settings", "layout")` para cubrir `/settings/invite` y la futura pantalla de Ajustes.
+- `createHouseholdInvite` revalida las rutas literales `/settings` y `/settings/invite` (`/settings` no tiene `layout.tsx`, así que `type: "layout"` no las cubriría).
 
 ## Tareas (un commit atómico por tarea)
 
