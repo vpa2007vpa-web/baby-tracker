@@ -50,24 +50,24 @@
 
 ### Bloque A — Base y registros puntuales
 
-- [ ] A1 `test: share the session double across action tests`
-- [ ] A2 `feat(records): add shared field schemas` (`lib/record-fields.ts` + tests)
-- [ ] A3 `feat(records): add idempotent insert helper` (`lib/records.ts` + factories)
-- [ ] A4 Pañales: `feat(diapers): add diaper change schemas` → `…queries` → `…actions`
-- [ ] A5 Crecimiento: `feat(growth): add growth measurement schemas` → `…queries` → `…actions`
-- [ ] A6 Salud: `feat(health): add health record schemas` → `…queries` → `…actions`
-- [ ] ⏸ Parada A: `npm test`, `typecheck`, `lint`, revisión de código e informe.
+- [x] A1 `test: share the session double across action tests`
+- [x] A2 `feat(records): add shared field schemas` (`lib/record-fields.ts` + tests)
+- [x] A3 `feat(records): add idempotent insert helper` (`lib/records.ts` + factories)
+- [x] A4 Pañales: `feat(diapers): add diaper change schemas` → `…queries` → `…actions`
+- [x] A5 Crecimiento: `feat(growth): add growth measurement schemas` → `…queries` → `…actions`
+- [x] A6 Salud: `feat(health): add health record schemas` → `…queries` → `…actions`
+- [x] ⏸ Parada A: `npm test`, `typecheck`, `lint`, revisión de código e informe.
 
 ### Bloque B — Cronómetros
 
-- [ ] B1 Sueño: schemas → queries → actions (+ concurrencia)
-- [ ] B2 Tomas: schemas → service (`suggestNextBreast`) → queries → actions (+ concurrencia y cambio de pecho)
-- [ ] ⏸ Parada B
+- [x] B1 Sueño: schemas → queries → actions (+ concurrencia)
+- [x] B2 Tomas: schemas → service (`suggestNextBreast`) → queries → actions (+ concurrencia y cambio de pecho)
+- [x] ⏸ Parada B
 
 ### Bloque C — Resumen y cierre
 
-- [ ] C1 `feat(dashboard): add daily summary service` y `feat(dashboard): add daily summary query`
-- [ ] C2 `docs`: roadmap de la Fase 2 y decisiones 049–053 en `CLAUDE.md`
+- [x] C1 `feat(dashboard): add daily summary service` y `feat(dashboard): add daily summary query`
+- [x] C2 `docs`: roadmap de la Fase 2 y decisiones 049–053 en `CLAUDE.md`
 
 ## Tests
 

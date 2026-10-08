@@ -206,15 +206,15 @@ baby-tracker/
 - [x] Tipo `ActionResult<T>` y helpers (`ok`, `validationError`, `handleActionError`). *(Adelantado a la Fase 1: lo necesitan las acciones de login.)*
 - [x] Autorización en todas las queries y actions: `requireMember()` y comprobación de que el `babyId` pertenece a la familia del usuario (`assertBabyInHousehold()`, `requireBaby()`; cada query y action nueva los usa).
 - [x] Familia: crear familia y bebé, generar código de invitación (con caducidad) y unirse con código (`features/household`: código Crockford de 10 caracteres, solo su hash en la BD, 24 h, un solo uso, máximo 2 miembros, canje atómico; ADR-043).
-- [ ] Esquemas Zod por módulo (alta y edición) con mensajes en español y reglas cruzadas: `endedAt > startedAt`, `amountMl` obligatorio en biberón, al menos una medida en crecimiento, rangos plausibles, sin fechas futuras.
-- [ ] Queries por módulo: listado por día, detalle, último registro y sesión activa.
-- [ ] Server Actions CRUD por módulo, **idempotentes**: el cliente envía el UUID del registro, así que un doble toque o un reintento no duplica nada. Todas guardan `createdById`.
-- [ ] Acciones de cronómetro seguras ante concurrencia: `startFeeding` / `stopFeeding` y `startSleepSession` / `stopSleepSession`.
+- [x] Esquemas Zod por módulo (alta y edición) con mensajes en español y reglas cruzadas: `endedAt > startedAt`, `amountMl` obligatorio en biberón, al menos una medida en crecimiento, rangos plausibles, sin fechas futuras. *(Esquemas paramétricos por zona horaria, `<entidad>Schemas(timeZone)`; decisiones 049, 050 y 052.)*
+- [x] Queries por módulo: listado por día, detalle, último registro y sesión activa. *(Las sesiones que cruzan la medianoche aparecen en los dos días; decisión 053.)*
+- [x] Server Actions CRUD por módulo, **idempotentes**: el cliente envía el UUID del registro, así que un doble toque o un reintento no duplica nada. Todas guardan `createdById`. *(`insertOnce`, ediciones con `updatedById` y borrado idempotente; decisión 050.)*
+- [x] Acciones de cronómetro seguras ante concurrencia: `startFeeding` / `stopFeeding` y `startSleepSession` / `stopSleepSession`, más `switchFeedingSide` (cambio de pecho en una transacción; decisión 051).
   - Inicio: el índice único parcial impide dos sesiones activas a la vez, y el conflicto se devuelve como `CONFLICT`.
   - Parada: idempotente; si el otro progenitor ya la paró, no da error.
-- [ ] Servicio de resumen diario (`getDailySummary`) calculado en la zona horaria del hogar, incluyendo sesiones que cruzan la medianoche.
-- [ ] Revalidación de rutas tras cada mutación.
-- [ ] Tests con Vitest:
+- [x] Servicio de resumen diario (`getDailySummary`) calculado en la zona horaria del hogar, incluyendo sesiones que cruzan la medianoche. *(`features/dashboard`: recuentos por día de inicio y duraciones repartidas por tramos; decisión 053.)*
+- [x] Revalidación de rutas tras cada mutación (`/` y la lista del módulo).
+- [x] Tests con Vitest (337 en total, con pruebas de mutación de las barreras de concurrencia):
   - esquemas Zod, duraciones y resumen diario;
   - concurrencia: doble alta con el mismo UUID, dos inicios de siesta simultáneos, doble parada;
   - autorización: un usuario no puede leer ni modificar datos de otra familia.
