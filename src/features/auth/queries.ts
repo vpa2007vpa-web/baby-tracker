@@ -28,6 +28,22 @@ export async function getMemberByUserId(
   };
 }
 
+/**
+ * Name of a member of `householdId`, for "iniciada por Ana". Null for anyone
+ * else (a former member, another household), so it never reveals a name
+ * from outside the family.
+ */
+export async function getMemberDisplayName(
+  userId: string,
+  householdId: string,
+): Promise<string | null> {
+  const member = await db.householdMember.findFirst({
+    where: { userId, householdId },
+    select: { displayName: true },
+  });
+  return member?.displayName ?? null;
+}
+
 export type CurrentBaby = { id: string; name: string; birthDate: Date };
 
 /**
