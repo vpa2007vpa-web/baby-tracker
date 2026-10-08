@@ -139,11 +139,9 @@ baby-tracker/
 │   ├── proxy.ts               # Refresco de la sesión de Supabase (antes middleware.ts)
 │   ├── app/                   # Solo routing y composición de pantallas
 │   │   ├── (auth)/            # login/, join/ (unirse con código de invitación)
-│   │   ├── (app)/             # Pantallas autenticadas · layout con BottomNav y RealtimeSync
-│   │   │   ├── page.tsx       # Dashboard "Hoy"
-│   │   │   ├── feeding/       # page.tsx (historial) · new/ · [id]/edit/
-│   │   │   ├── diapers/ · sleep/ · growth/ · health/
-│   │   │   └── settings/      # Bebé, familia e invitaciones
+│   │   ├── (app)/             # Pantallas autenticadas (RealtimeSync en la Fase 4)
+│   │   │   ├── (tabs)/        # Con BottomNav: page.tsx ("Hoy"), feeding/ · diapers/ · sleep/ (historiales), more/ ("Más"), growth/ · health/ · settings/
+│   │   │   └── (task)/        # Sin barra, una tarea por pantalla: feeding/new/ · feeding/[id]/edit/ · settings/invite/…
 │   │   └── manifest.ts        # Fase 4
 │   ├── features/              # Un directorio por módulo de dominio
 │   │   ├── feeding/
@@ -228,7 +226,7 @@ baby-tracker/
 - [x] Pantallas de acceso: login con email + código, crear familia y bebé, e invitar o unirse con código (el código se muestra una sola vez: botones "Compartir" y "Generar otro"). *(`/join`, `/join/create`, `/join/code` y `/settings/invite`; decisiones 046–048.)*
 - [ ] Ajustes de familia: ver miembros e invitación pendiente, y expulsar a un miembro (respuesta si un código se filtra antes de que se una la pareja).
 - [ ] Layout base: `PageHeader`, `BottomNav` (Hoy · Tomas · Pañales · Sueño · Más), contenedor `max-w-md` y *safe areas* de iOS. *(`PageHeader` ya existe.)*
-- [ ] Componentes compartidos: `DateTimeField` con atajos ("Ahora", "−5 min", "−15 min", "−30 min"), `NumberStepper`, `ChoiceGrid` (opciones como botones grandes), `SubmitButton` con estado pendiente y `EmptyState`. *(Ya existen `SubmitButton`, `TextField`, `FormFooter`, `FormSkeleton` y `LinkCard`.)*
+- [ ] Componentes compartidos: `DateTimeField` con atajos ("Ahora", "−5 min", "−15 min", "−30 min"), `NumberStepper`, `ChoiceGrid` (opciones como botones grandes), `SubmitButton` con estado pendiente y `EmptyState`. *(Ya existen `SubmitButton`, `EmptyState`, `TextField`, `FormFooter`, `FormSkeleton` y `LinkCard`.)*
 - [ ] **Alimentación:** botones "Pecho izq." / "Pecho der." con cronómetro, sugerencia del siguiente pecho, biberón con cantidades rápidas (60 / 90 / 120 / 150 ml) e historial del día.
 - [ ] **Pañales:** registro en un toque (Mojado / Sucio / Mixto) y detalle opcional de color y textura con muestras visuales y texto.
 - [ ] **Sueño:** cronómetro grande iniciar / parar y entrada manual.
