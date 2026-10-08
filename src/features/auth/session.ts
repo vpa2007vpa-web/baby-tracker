@@ -3,10 +3,15 @@ import "server-only";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 
-import { getMemberByUserId, type Member } from "@/features/auth/queries";
+import {
+  type CurrentBaby,
+  getMemberByUserId,
+  getPrimaryBaby,
+  type Member,
+} from "@/features/auth/queries";
 import { createSupabaseReadOnlyServerClient } from "@/lib/supabase/server";
 
-export type { Member } from "@/features/auth/queries";
+export type { CurrentBaby, Member } from "@/features/auth/queries";
 
 /**
  * Verified Supabase Auth user id, or null. Uses getClaims(), which validates
@@ -35,4 +40,22 @@ export async function requireMember(): Promise<Member> {
   if (!member) redirect("/join");
 
   return member;
+}
+
+const getBabyForHousehold = cache(getPrimaryBaby);
+
+/**
+ * Entry point of every module page: the member plus the household's baby.
+ * Same redirect rules as requireMember(); call it outside try/catch.
+ */
+export async function requireBaby(): Promise<{
+  member: Member;
+  baby: CurrentBaby;
+}> {
+  const member = await requireMember();
+  const baby = await getBabyForHousehold(member.householdId);
+  // Until "create baby" exists (phase 2, task 2), go back to /join.
+  if (!baby) redirect("/join");
+
+  return { member, baby };
 }
