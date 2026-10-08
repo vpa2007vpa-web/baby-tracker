@@ -56,7 +56,7 @@ export default async function HomePage(): Promise<ReactNode> {
   const canInvite = members.length < MAX_HOUSEHOLD_MEMBERS;
 
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 pt-8 pb-[max(1rem,env(safe-area-inset-bottom))]">
+    <>
       <header className="flex flex-col gap-1">
         <h1 className="text-3xl font-semibold">Hola, {member.displayName}</h1>
         <p className="text-muted-foreground">
@@ -84,6 +84,6 @@ export default async function HomePage(): Promise<ReactNode> {
       <div className="mt-auto">
         <SignOutButton />
       </div>
-    </main>
+    </>
   );
 }
