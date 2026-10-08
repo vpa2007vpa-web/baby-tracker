@@ -54,7 +54,7 @@ export function validationError(error: z.ZodError): ActionResult<never> {
   );
 }
 
-function readPrismaErrorCode(error: unknown): string | undefined {
+export function readPrismaCode(error: unknown): string | undefined {
   // Structural check instead of importing Prisma, so this module stays
   // importable from client components.
   if (
@@ -75,7 +75,7 @@ export function handleActionError(
   actionName: string,
   error: unknown,
 ): ActionResult<never> {
-  const code = readPrismaErrorCode(error);
+  const code = readPrismaCode(error);
   if (error instanceof NotFoundError || code === "P2025") {
     return actionError("NOT_FOUND", NOT_FOUND_MESSAGE);
   }
