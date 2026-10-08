@@ -83,6 +83,12 @@
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
   --radius: 0.625rem;
+  /*
+   * Height of the bottom navigation bar, without the iOS safe area. The bar
+   * and the bottom padding of the (tabs) layout both read it, so content is
+   * never hidden under the bar.
+   */
+  --bottom-nav-height: 4rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
