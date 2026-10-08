@@ -691,8 +691,8 @@ export async function requireBaby(): Promise<{ member: Member; baby: CurrentBaby
 - [ ] `CLAUDE.md` §7: base de datos de test en dev (D1), `npm test` = unit + integración (D3), `NotFoundError`, `requireBaby()` + "primer bebé" como bebé del MVP. §3.5: los tests de integración se llaman `*.int.test.ts`.
 - [ ] Commit — `docs: record phase 2 authorization and test database decisions` y `git push` si se autoriza.
 
-## Decisiones pendientes
+## Decisiones (resueltas el 2026-10-08)
 
-- **D1 · Base de datos de test:** `baby_tracker_test` dentro del proyecto **dev** (recomendada) · PGlite en proceso (dependencias nuevas de la comunidad, sin concurrencia real) · instalar Docker Desktop.
-- **D2 · Autorización permanente para `TRUNCATE`** (regla 0.2) **limitada a `baby_tracker_test`**, ejecutado por el *setup* de tests con la guarda de `current_database()`.
-- **D3 · `npm test`:** unit + integración (recomendado, para que la "definición de hecho" incluya autorización y concurrencia) · solo unit, con la integración aparte en `npm run test:int`.
+- **D1 · Base de datos de test:** `baby_tracker_test` en dev (decisión 037).
+- **D2 · `TRUNCATE`:** autorizado solo en `baby_tracker_test` (decisión 038).
+- **D3 · `npm test`:** unit + integración (decisión 037).

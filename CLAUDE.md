@@ -365,7 +365,7 @@ export type ActionResult<T = void> =
 - Componentes de ~150 líneas como máximo; si crecen, extraer subcomponentes.
 - Los comentarios explican el **porqué**, no el qué.
 - Sin código muerto ni `console.log` en commits (`console.error` solo en fronteras de error).
-- Tests con Vitest para schemas, servicios, utilidades de fechas, autorización y concurrencia, en `*.test.ts` junto al archivo probado.
+- Tests con Vitest para schemas, servicios, utilidades de fechas, autorización y concurrencia, junto al archivo probado: `*.test.ts` (unit, sin red ni base de datos) y `*.int.test.ts` (integración contra `baby_tracker_test`, con las factorías de `src/test/factories.ts`).
 - Commits con Conventional Commits en inglés: `feat(feeding): add breast timer`, `fix(sleep): split sessions across midnight`.
 
 ### 3.6 Definición de "hecho"
@@ -449,7 +449,8 @@ export type ActionResult<T = void> =
 | `npm run build` / `npm start` | Build y producción |
 | `npm run typecheck` | `next typegen` + `tsc --noEmit` (decisión 035) |
 | `npm run lint` / `npm run format` | ESLint / Prettier |
-| `npm test` | Vitest |
+| `npm test` | Vitest: unit + integración (`test:unit` / `test:int` por separado) |
+| `npm run test:db` | Crear y migrar `baby_tracker_test` en el proyecto **dev** |
 | `npx prisma migrate dev --name <nombre>` | Nueva migración (**solo proyecto dev**) |
 | `npx prisma migrate dev --create-only --name <nombre>` | Crear la migración sin aplicarla, para añadir SQL (RLS, índices parciales…) |
 | `npx prisma migrate deploy` | Aplicar migraciones en **prod** |
@@ -501,6 +502,10 @@ Añadir una fila por cada decisión de arquitectura nueva o modificada. No borra
 | 034 | 2026-10-08 | Login en dos pasos dentro de `/login` (el email vive en estado del cliente, no en la URL), con *actions* `requestEmailOtp` / `verifyEmailOtp` / `signOut`. `requireMember()` redirige a `/login` sin sesión y a `/join` sin familia. Cliente Supabase de solo lectura en Server Components. | Ningún dato personal en la URL ni en los logs; el refresco de sesión ocurre en `proxy.ts`. |
 | 035 | 2026-10-08 | `npm run typecheck` = `next typegen && tsc --noEmit`. | Los tipos de rutas de Next (`LayoutProps`, `PageProps`) se regeneran antes de comprobar. |
 | 036 | 2026-10-08 | El código OTP de email tiene **8 dígitos** (sustituye a los 6 de la regla 2.7 original). `OTP_LENGTH` es la única fuente en el código y las casillas de `InputOTP` se reparten el ancho. | Es la longitud que envía Supabase Auth en este proyecto; 8 casillas fijas de 48 px no caben en 375 px. |
+| 037 | 2026-10-08 | Tests de integración contra `baby_tracker_test`, una base de datos aparte dentro del proyecto **dev** (`npm run test:db`, con guarda de proyecto). Vitest con proyectos `unit` (su `DATABASE_URL` no apunta a nada) e `integration` (`*.int.test.ts`, en serie); `npm test` ejecuta ambos. | No hay Docker; PGlite exige un adaptador de la comunidad desfasado y no prueba concurrencia real. Postgres 17 real sin dependencias nuevas. |
+| 038 | 2026-10-08 | Autorización permanente para `TRUNCATE public.households CASCADE` antes de cada test de integración, **solo** en `baby_tracker_test` y tras `assertTestDatabase(current_database())`. Excepción acotada a la regla 0.2. | Cada test parte de una base vacía; la guarda impide tocar datos de dev o prod. |
+| 039 | 2026-10-08 | `NotFoundError` (en `lib/action-result.ts`) para las comprobaciones de autorización; `handleActionError` lo traduce al mismo `NOT_FOUND` que `P2025`. `assertBabyInHousehold()` responde igual a ids ajenos, inexistentes o mal formados. | Ningún recurso de otra familia es distinguible de uno que no existe (regla 2.7). |
+| 040 | 2026-10-08 | `requireBaby()` es el punto de entrada de las páginas de módulos; el bebé del MVP es el primero creado en la familia (`getPrimaryBaby`). | Una sola llamada da miembro y bebé; el esquema ya admite varios bebés para el selector del backlog. |
 
 ---
 

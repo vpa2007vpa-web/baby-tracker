@@ -204,7 +204,7 @@ baby-tracker/
 **Objetivo:** toda la lógica de lectura y escritura, autorizada, validada y probada, sin depender de la UI.
 
 - [x] Tipo `ActionResult<T>` y helpers (`ok`, `validationError`, `handleActionError`). *(Adelantado a la Fase 1: lo necesitan las acciones de login.)*
-- [ ] Autorización en todas las queries y actions: `requireMember()` y comprobación de que el `babyId` pertenece a la familia del usuario.
+- [x] Autorización en todas las queries y actions: `requireMember()` y comprobación de que el `babyId` pertenece a la familia del usuario (`assertBabyInHousehold()`, `requireBaby()`; cada query y action nueva los usa).
 - [ ] Familia: crear familia y bebé, generar código de invitación (con caducidad) y unirse con código.
 - [ ] Esquemas Zod por módulo (alta y edición) con mensajes en español y reglas cruzadas: `endedAt > startedAt`, `amountMl` obligatorio en biberón, al menos una medida en crecimiento, rangos plausibles, sin fechas futuras.
 - [ ] Queries por módulo: listado por día, detalle, último registro y sesión activa.
@@ -312,6 +312,13 @@ cp .env.example .env          # Rellenar con los datos del proyecto Supabase de 
    npm run dev                                    # http://localhost:3000
    ```
 
+4. Tests de integración: crear y migrar una vez la base de datos de test `baby_tracker_test` dentro del proyecto **dev** (usa `SEED_DEV_PROJECT_REF` de `.env`):
+
+   ```bash
+   npm run test:db
+   npm test                                       # unit + integración
+   ```
+
 | Variable | De dónde sale (panel de Supabase → botón **Connect**) | Uso |
 |---|---|---|
 | `DATABASE_URL` | Transaction pooler, puerto **6543**, añadiendo `?pgbouncer=true` | Prisma Client en la app |
@@ -327,7 +334,9 @@ cp .env.example .env          # Rellenar con los datos del proyecto Supabase de 
 | `npm run build` / `npm start` | Build y servidor de producción |
 | `npm run typecheck` | `next typegen` + `tsc --noEmit` |
 | `npm run lint` / `npm run format` | ESLint / Prettier |
-| `npm test` | Vitest |
+| `npm test` | Vitest: unit + integración |
+| `npm run test:unit` / `npm run test:int` | Solo unit (sin red) / solo integración (`baby_tracker_test`) |
+| `npm run test:db` | Crea y migra la base de datos de test en el proyecto dev |
 | `npx prisma migrate status` | Estado de las migraciones |
 | `npx prisma studio` | Explorar la base de datos |
 
