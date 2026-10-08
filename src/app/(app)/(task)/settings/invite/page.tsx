@@ -16,7 +16,8 @@ import { env } from "@/lib/env";
 
 export const metadata: Metadata = { title: "Invitar · Métricas Bebé" };
 
-// Until the "Más" tab and the Ajustes screen exist, Atrás goes home.
+// Reached from Hoy and from Más; Atrás goes home until Ajustes hosts the
+// invite.
 export default function InvitePage(): ReactNode {
   return (
     <>
