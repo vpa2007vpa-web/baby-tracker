@@ -1,4 +1,4 @@
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 
 import { defineConfig, env } from "prisma/config";
 
@@ -15,16 +15,9 @@ export default defineConfig({
     path: "prisma/migrations",
     // react-server condition: lets the seed import `server-only` modules (db, env).
     seed: "tsx --conditions=react-server prisma/seed.ts",
-    // The shadow database is a plain PostgreSQL database without the objects
-    // created by prisma/platform/supabase-bootstrap.sql. These no-op stubs let
-    // migrations that reference them replay there.
-    initShadowDb: `
-      CREATE SCHEMA IF NOT EXISTS private;
-      CREATE OR REPLACE FUNCTION private.auth_uid() RETURNS uuid
-        LANGUAGE sql STABLE AS 'SELECT NULL::uuid';
-      CREATE OR REPLACE FUNCTION private.add_table_to_realtime(target regclass) RETURNS void
-        LANGUAGE plpgsql AS 'BEGIN END';
-    `,
+    // The shadow database lacks the objects of supabase-bootstrap.sql; these
+    // no-op stubs let the migrations that reference them replay there.
+    initShadowDb: readFileSync("prisma/platform/shadow-stubs.sql", "utf8"),
   },
   datasource: {
     // CLI only (migrate, studio): session pooler / direct connection on :5432.
