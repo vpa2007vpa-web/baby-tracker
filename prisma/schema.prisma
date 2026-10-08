@@ -52,7 +52,9 @@ model HouseholdMember {
 model HouseholdInvite {
   id          String    @id @default(uuid()) @db.Uuid
   householdId String    @map("household_id") @db.Uuid
-  code        String    @unique
+  /// SHA-256 (hex) of the normalized code (ADR-043). The plain code is shown
+  /// once and never stored.
+  codeHash    String    @unique @map("code_hash")
   expiresAt   DateTime  @map("expires_at") @db.Timestamptz(3)
   usedAt      DateTime? @map("used_at") @db.Timestamptz(3)
   usedById    String?   @map("used_by_id") @db.Uuid
