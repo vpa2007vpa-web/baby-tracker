@@ -27,3 +27,19 @@ export async function getMemberByUserId(
     displayName: member.displayName,
   };
 }
+
+export type CurrentBaby = { id: string; name: string; birthDate: Date };
+
+/**
+ * The MVP shows one baby per household: the first one created. The schema
+ * already supports several (the selector is in the backlog).
+ */
+export async function getPrimaryBaby(
+  householdId: string,
+): Promise<CurrentBaby | null> {
+  return db.baby.findFirst({
+    where: { householdId },
+    orderBy: { createdAt: "asc" },
+    select: { id: true, name: true, birthDate: true },
+  });
+}
