@@ -72,3 +72,25 @@ describe.each([
     );
   });
 });
+
+// The bottom navigation's neutral states (components/layout/bottom-nav-list):
+// inactive tabs are muted text on the page, and Hoy and Más mark the active
+// tab with a muted pill behind a foreground icon.
+describe.each([
+  ["light", ":root"],
+  ["dark", ".dark"],
+])("bottom navigation neutral states (%s)", (_mode, selector) => {
+  const block = readBlock(selector);
+
+  it("keeps inactive tab labels readable", () => {
+    expect(
+      contrast(block, "muted-foreground", "background"),
+    ).toBeGreaterThanOrEqual(WCAG_AA_TEXT);
+  });
+
+  it("makes the active icon stand out on the neutral pill", () => {
+    expect(contrast(block, "foreground", "muted")).toBeGreaterThanOrEqual(
+      WCAG_AA_NON_TEXT,
+    );
+  });
+});
