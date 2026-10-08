@@ -38,7 +38,11 @@ async function JoinPageActions(): Promise<ReactNode> {
 
 function JoinPageSkeleton(): ReactNode {
   return (
-    <div aria-hidden className="mt-auto flex flex-col gap-6">
+    <div
+      role="status"
+      aria-label="Cargando"
+      className="mt-auto flex flex-col gap-6"
+    >
       <div className="flex flex-col gap-3">
         <Skeleton className="h-20 w-full rounded-2xl" />
         <Skeleton className="h-20 w-full rounded-2xl" />
