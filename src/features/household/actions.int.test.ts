@@ -9,8 +9,8 @@ import {
 } from "@/features/household/actions";
 import { db } from "@/lib/db";
 import { parseDateOnly } from "@/lib/dates";
-import { session } from "@/test/action-mocks";
 import { createFamily, createInvite, createMember } from "@/test/factories";
+import { session } from "@/test/session-double";
 
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 vi.mock("next/navigation", () => ({
@@ -18,20 +18,7 @@ vi.mock("next/navigation", () => ({
     throw new Error(`REDIRECT:${path}`);
   }),
 }));
-// The double reads the session from `session` and the household from the real
-// database, so authorization is exercised for real.
-vi.mock("@/features/auth/session", async () => {
-  const { session: current } = await import("@/test/action-mocks");
-  const { getMemberByUserId } = await import("@/features/auth/queries");
-  return {
-    requireUserId: vi.fn(async () => current.userId),
-    requireMember: vi.fn(async () => {
-      const member = await getMemberByUserId(current.userId);
-      if (!member) throw new Error("REDIRECT:/join");
-      return member;
-    }),
-  };
-});
+vi.mock("@/features/auth/session", () => import("@/test/session-double"));
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 // Relative to today so the "at most three years old" rule never expires the test.
