@@ -72,6 +72,23 @@ describe("createDiaperChange", () => {
     });
   });
 
+  it("ignores an author forged in the input", async () => {
+    const family = await signedInFamily();
+    const id = randomUUID();
+
+    await createDiaperChange({
+      id,
+      babyId: family.babyId,
+      type: "WET",
+      createdById: randomUUID(),
+      updatedById: randomUUID(),
+    });
+
+    await expect(
+      db.diaperChange.findUniqueOrThrow({ where: { id } }),
+    ).resolves.toMatchObject({ createdById: family.userId, updatedById: null });
+  });
+
   it("creates a single diaper on a double tap", async () => {
     const family = await signedInFamily();
     const input = { id: randomUUID(), babyId: family.babyId, type: "WET" };
