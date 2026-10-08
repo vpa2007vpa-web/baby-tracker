@@ -82,9 +82,10 @@ export async function createHousehold(input: unknown): Promise<ActionResult> {
   } catch (error) {
     // A simultaneous double tap: the loser hits a unique key (household id or
     // member userId) once the winner commits; the winner's household stands.
-    if (!(await getMemberByUserId(userId))) {
-      return handleActionError("createHousehold", error);
-    }
+    // If this lookup fails as well (database down), report the original
+    // error through the boundary instead of letting the action throw.
+    const existing = await getMemberByUserId(userId).catch(() => null);
+    if (!existing) return handleActionError("createHousehold", error);
   }
 
   revalidatePath("/");
