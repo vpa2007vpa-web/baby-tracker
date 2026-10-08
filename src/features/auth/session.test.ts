@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   requireBaby,
   requireMember,
+  requireNoHousehold,
   requireUserId,
 } from "@/features/auth/session";
 
@@ -70,6 +71,27 @@ describe("requireMember", () => {
     getClaims.mockResolvedValue(SIGNED_IN);
     getMemberByUserId.mockResolvedValue(MEMBER);
     await expect(requireMember()).resolves.toEqual(MEMBER);
+    expect(getMemberByUserId).toHaveBeenCalledWith("u1");
+  });
+});
+
+describe("requireNoHousehold", () => {
+  it("redirects to /login without a valid session", async () => {
+    getClaims.mockResolvedValue({ data: null, error: new Error("expired") });
+    await expect(requireNoHousehold()).rejects.toThrow("REDIRECT:/login");
+    expect(getMemberByUserId).not.toHaveBeenCalled();
+  });
+
+  it("sends a user who already has a household home", async () => {
+    getClaims.mockResolvedValue(SIGNED_IN);
+    getMemberByUserId.mockResolvedValue(MEMBER);
+    await expect(requireNoHousehold()).rejects.toThrow("REDIRECT:/");
+  });
+
+  it("returns the user id while the user has no household", async () => {
+    getClaims.mockResolvedValue(SIGNED_IN);
+    getMemberByUserId.mockResolvedValue(null);
+    await expect(requireNoHousehold()).resolves.toBe("u1");
     expect(getMemberByUserId).toHaveBeenCalledWith("u1");
   });
 });

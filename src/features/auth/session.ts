@@ -38,6 +38,17 @@ export async function requireUserId(): Promise<string> {
 }
 
 /**
+ * Guard of the onboarding screens (/join/*): a valid session or the login,
+ * and home for users who already belong to a household. Call it outside
+ * try/catch.
+ */
+export async function requireNoHousehold(): Promise<string> {
+  const userId = await requireUserId();
+  if (await getMemberForUser(userId)) redirect("/");
+  return userId;
+}
+
+/**
  * Entry point of every authenticated page and Server Action. Redirects to the
  * login without a session, and to /join when the user has no household yet.
  * redirect() throws, so call it outside any try/catch.
