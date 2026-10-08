@@ -1,7 +1,13 @@
 import { randomUUID } from "node:crypto";
 
 import { getInviteExpiry, hashInviteCode } from "@/features/household/service";
-import type { HouseholdRole } from "@/generated/prisma/client";
+import type {
+  BottleContent,
+  DiaperType,
+  FeedingType,
+  HealthRecordKind,
+  HouseholdRole,
+} from "@/generated/prisma/client";
 import { db } from "@/lib/db";
 
 // Minimal valid rows for integration tests; every helper returns only ids.
@@ -76,4 +82,126 @@ export async function createInvite(
     select: { id: true },
   });
   return { inviteId: id };
+}
+
+// ─── Baby records ────────────────────────────────────────────────────────────
+// Defaults describe a plausible past record; pass `endedAt: null` for an
+// active timer. `createdById` is required: every record has an author.
+
+const MINUTE_MS = 60_000;
+
+function minutesAgo(minutes: number): Date {
+  return new Date(Date.now() - minutes * MINUTE_MS);
+}
+
+export async function createDiaperChange(
+  babyId: string,
+  input: {
+    createdById: string;
+    id?: string;
+    type?: DiaperType;
+    occurredAt?: Date;
+  },
+): Promise<{ id: string }> {
+  return db.diaperChange.create({
+    data: {
+      id: input.id,
+      babyId,
+      type: input.type ?? "WET",
+      occurredAt: input.occurredAt ?? minutesAgo(30),
+      createdById: input.createdById,
+    },
+    select: { id: true },
+  });
+}
+
+export async function createFeeding(
+  babyId: string,
+  input: {
+    createdById: string;
+    id?: string;
+    type?: FeedingType;
+    startedAt?: Date;
+    endedAt?: Date | null;
+    amountMl?: number;
+    bottleContent?: BottleContent;
+  },
+): Promise<{ id: string }> {
+  const type = input.type ?? "BREAST_LEFT";
+  const isBottle = type === "BOTTLE";
+  return db.feeding.create({
+    data: {
+      id: input.id,
+      babyId,
+      type,
+      startedAt: input.startedAt ?? minutesAgo(60),
+      // Bottles are point-in-time; breast feedings end unless told otherwise.
+      endedAt: isBottle
+        ? null
+        : input.endedAt === undefined
+          ? minutesAgo(45)
+          : input.endedAt,
+      amountMl: isBottle ? (input.amountMl ?? 90) : null,
+      bottleContent: isBottle ? (input.bottleContent ?? "FORMULA") : null,
+      createdById: input.createdById,
+    },
+    select: { id: true },
+  });
+}
+
+export async function createSleepSession(
+  babyId: string,
+  input: {
+    createdById: string;
+    id?: string;
+    startedAt?: Date;
+    endedAt?: Date | null;
+  },
+): Promise<{ id: string }> {
+  return db.sleepSession.create({
+    data: {
+      id: input.id,
+      babyId,
+      startedAt: input.startedAt ?? minutesAgo(120),
+      endedAt: input.endedAt === undefined ? minutesAgo(60) : input.endedAt,
+      createdById: input.createdById,
+    },
+    select: { id: true },
+  });
+}
+
+export async function createGrowthMeasurement(
+  babyId: string,
+  input: { createdById: string; measuredAt?: Date; weightGrams?: number },
+): Promise<{ id: string }> {
+  return db.growthMeasurement.create({
+    data: {
+      babyId,
+      measuredAt: input.measuredAt ?? minutesAgo(60),
+      weightGrams: input.weightGrams ?? 4850,
+      createdById: input.createdById,
+    },
+    select: { id: true },
+  });
+}
+
+export async function createHealthRecord(
+  babyId: string,
+  input: {
+    createdById: string;
+    kind?: HealthRecordKind;
+    name?: string;
+    administeredAt?: Date;
+  },
+): Promise<{ id: string }> {
+  return db.healthRecord.create({
+    data: {
+      babyId,
+      kind: input.kind ?? "MEDICATION",
+      name: input.name ?? "Vitamina D",
+      administeredAt: input.administeredAt ?? minutesAgo(60),
+      createdById: input.createdById,
+    },
+    select: { id: true },
+  });
 }
