@@ -5,6 +5,7 @@ import {
   formatTime,
   formatTimeAgo,
   getDayRange,
+  parseDateOnly,
   parseDateTimeLocal,
 } from "@/lib/dates";
 
@@ -59,6 +60,24 @@ describe("parseDateTimeLocal", () => {
     "rejects %j",
     (value) => {
       expect(parseDateTimeLocal(value, MADRID)).toBeNull();
+    },
+  );
+});
+
+describe("parseDateOnly", () => {
+  it("reads <input type=date> values as local midnight in the household zone", () => {
+    expect(parseDateOnly("2026-08-27", MADRID)?.toISOString()).toBe(
+      "2026-08-26T22:00:00.000Z",
+    );
+    expect(parseDateOnly("2026-01-15", MADRID)?.toISOString()).toBe(
+      "2026-01-14T23:00:00.000Z",
+    );
+  });
+
+  it.each(["", "2026-02-31", "27/08/2026", "2026-08-27T10:00"])(
+    "rejects %j",
+    (value) => {
+      expect(parseDateOnly(value, MADRID)).toBeNull();
     },
   );
 });

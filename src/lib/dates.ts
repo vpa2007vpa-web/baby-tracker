@@ -59,6 +59,14 @@ export function parseDateTimeLocal(
   return new Date(local.getTime());
 }
 
+const DATE_ONLY = /^\d{4}-\d{2}-\d{2}$/;
+
+/** `<input type="date">` value → midnight of that day in `timeZone`; null if invalid. */
+export function parseDateOnly(value: string, timeZone: string): Date | null {
+  if (!DATE_ONLY.test(value)) return null;
+  return parseDateTimeLocal(`${value}T00:00`, timeZone);
+}
+
 /** "14:30" — 24 h clock in the household time zone. */
 export function formatTime(instant: Date, timeZone: string): string {
   return format(new TZDate(instant, timeZone), "HH:mm");
