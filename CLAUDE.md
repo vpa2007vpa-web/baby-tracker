@@ -447,7 +447,7 @@ export type ActionResult<T = void> =
 |---|---|
 | `npm run dev` | Desarrollo |
 | `npm run build` / `npm start` | Build y producción |
-| `npm run typecheck` | `tsc --noEmit` |
+| `npm run typecheck` | `next typegen` + `tsc --noEmit` (decisión 035) |
 | `npm run lint` / `npm run format` | ESLint / Prettier |
 | `npm test` | Vitest |
 | `npx prisma migrate dev --name <nombre>` | Nueva migración (**solo proyecto dev**) |

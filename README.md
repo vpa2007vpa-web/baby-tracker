@@ -180,7 +180,7 @@ baby-tracker/
 - [x] Endurecer `tsconfig.json` (`strict`, `noUncheckedIndexedAccess`, `noImplicitOverride`, `noFallthroughCasesInSwitch`).
 - [x] Prettier + `prettier-plugin-tailwindcss`; scripts `typecheck`, `lint`, `format`, `test`.
 - [x] Inicializar shadcn/ui (tema, tokens de color por módulo, modo oscuro) y añadir los componentes base: Button, Card, Input, Label, Field (sustituye a Form, ver decisión 020), ToggleGroup, Tabs, Sonner, AlertDialog, Skeleton, InputOTP.
-- [ ] Proyectos de Supabase en una región de la UE: **dev** (pruebas) y **prod** (datos reales). Data API sin exponer las tablas de la app, porque el acceso a datos va por Prisma. *(dev `baby-tracker` listo; prod antes de desplegar, decisión 026; **pendiente: desactivar la Data API en el panel**.)*
+- [x] Proyecto de Supabase **dev** (`baby-tracker`, eu-west-3) con la Data API desactivada, porque el acceso a datos va por Prisma. El proyecto **prod** se crea al desplegar (Fase 4, decisión 026).
 - [x] Rol de base de datos dedicado `prisma`, según la guía de Supabase para Prisma.
 - [x] Instalar `prisma@7`, `@prisma/client@7`, `@prisma/adapter-pg` y `pg`.
 - [x] Configurar las **dos URLs de conexión**: `DATABASE_URL` (pooler transaccional, puerto 6543, `?pgbouncer=true`) para la app y `DIRECT_URL` (session pooler o conexión directa, puerto 5432) para las migraciones en `prisma.config.ts`.
@@ -191,9 +191,9 @@ baby-tracker/
   - índices únicos parciales (una sola toma de pecho y una sola siesta activas por bebé);
   - tablas añadidas a la publicación `supabase_realtime`.
 - [x] **Verificar la migración vía MCP de Supabase:** `_prisma_migrations`, tablas, RLS, políticas, publicación y *advisors* de seguridad.
-- [ ] `prisma/seed.ts` con una familia, un bebé y unos 3 días de datos realistas (solo en dev). *(Escrito; se ejecuta tras el primer inicio de sesión con `SEED_OWNER_USER_ID`.)*
+- [x] `prisma/seed.ts` con una familia, un bebé y unos 3 días de datos realistas (solo en dev).
 - [x] Singleton de `PrismaClient` en `src/lib/db.ts` con `PrismaPg` sobre `DATABASE_URL`, protegido con `server-only`.
-- [ ] Supabase Auth: clientes `@supabase/ssr` (servidor y navegador), refresco de sesión en `src/proxy.ts` y login con email + código de 8 dígitos. *(SMTP propio y plantilla con `{{ .Token }}` configurados; falta el primer inicio de sesión real.)*
+- [x] Supabase Auth: clientes `@supabase/ssr` (servidor y navegador), refresco de sesión en `src/proxy.ts` y login con email + código de 8 dígitos (SMTP propio con `{{ .Token }}` en la plantilla).
 - [x] Helper `requireMember()` que devuelve `userId` y `householdId`, o redirige al login.
 - [x] Helpers de fechas en `src/lib/dates.ts` (inicio/fin de día en la zona del hogar, duraciones, formato en español).
 
@@ -260,7 +260,8 @@ baby-tracker/
 
 - [ ] `RealtimeSync` en el layout autenticado:
   - suscripción autenticada a los cambios de las tablas del bebé con Supabase Realtime;
-  - al recibir un evento, `router.refresh()` con *debounce*.
+  - al recibir un evento, `router.refresh()` con *debounce*;
+  - los eventos `DELETE` no se pueden filtrar por `baby_id` (limitación de `postgres_changes`): suscribirse a ellos por separado o pasar a Broadcast (regla 2.8).
 - [ ] Reconexión robusta: al volver a primer plano (`visibilitychange`) o al recuperar la red (`online`), refrescar los datos y restablecer la suscripción. Los navegadores móviles cierran los WebSockets en segundo plano.
 - [ ] Indicador de estado de conexión (en línea · reconectando · sin conexión). Sin conexión, los botones de registro se deshabilitan con un mensaje claro: en el MVP no hay escritura offline.
 - [ ] Cronómetros compartidos: lo que inicia un progenitor lo ve en marcha, y lo puede parar, el otro.
@@ -279,7 +280,8 @@ baby-tracker/
 **Despliegue**
 
 - [ ] Vercel (u otra plataforma) con las funciones en una región de la UE próxima a Supabase.
-- [ ] Variables de entorno de producción y `prisma migrate deploy` contra el proyecto **prod**, verificado vía MCP.
+- [ ] Proyecto de Supabase **prod** en la UE, igual que dev: `prisma/platform/supabase-bootstrap.sql`, Data API desactivada, SMTP propio con `{{ .Token }}` en la plantilla y longitud del código OTP en 8.
+- [ ] Variables de entorno de producción (incluida `DATABASE_CA_CERT`) y `prisma migrate deploy` contra el proyecto **prod**, verificado vía MCP.
 
 **Criterio de salida:**
 - La app se instala en Android e iOS y abre en modo *standalone*.
@@ -323,7 +325,7 @@ cp .env.example .env          # Rellenar con los datos del proyecto Supabase de 
 |---|---|
 | `npm run dev` | Servidor de desarrollo |
 | `npm run build` / `npm start` | Build y servidor de producción |
-| `npm run typecheck` | `tsc --noEmit` |
+| `npm run typecheck` | `next typegen` + `tsc --noEmit` |
 | `npm run lint` / `npm run format` | ESLint / Prettier |
 | `npm test` | Vitest |
 | `npx prisma migrate status` | Estado de las migraciones |
