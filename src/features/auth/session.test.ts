@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { requireBaby, requireMember } from "@/features/auth/session";
+import {
+  requireBaby,
+  requireMember,
+  requireUserId,
+} from "@/features/auth/session";
 
 // vi.mock factories are hoisted above imports; vi.hoisted shares the mocks.
 const { getClaims, getMemberByUserId, getPrimaryBaby } = vi.hoisted(() => ({
@@ -34,6 +38,19 @@ const SIGNED_IN = { data: { claims: { sub: "u1" } }, error: null };
 
 beforeEach(() => {
   vi.clearAllMocks();
+});
+
+describe("requireUserId", () => {
+  it("redirects to /login without a valid session", async () => {
+    getClaims.mockResolvedValue({ data: null, error: new Error("expired") });
+    await expect(requireUserId()).rejects.toThrow("REDIRECT:/login");
+  });
+
+  it("returns the user id without requiring a household", async () => {
+    getClaims.mockResolvedValue(SIGNED_IN);
+    await expect(requireUserId()).resolves.toBe("u1");
+    expect(getMemberByUserId).not.toHaveBeenCalled();
+  });
 });
 
 describe("requireMember", () => {

@@ -28,13 +28,22 @@ export const getSessionUserId = cache(async (): Promise<string | null> => {
 const getMemberForUser = cache(getMemberByUserId);
 
 /**
+ * For flows that run before having a household (create one, join one):
+ * a valid session or a redirect to the login. Call it outside try/catch.
+ */
+export async function requireUserId(): Promise<string> {
+  const userId = await getSessionUserId();
+  if (!userId) redirect("/login");
+  return userId;
+}
+
+/**
  * Entry point of every authenticated page and Server Action. Redirects to the
  * login without a session, and to /join when the user has no household yet.
  * redirect() throws, so call it outside any try/catch.
  */
 export async function requireMember(): Promise<Member> {
-  const userId = await getSessionUserId();
-  if (!userId) redirect("/login");
+  const userId = await requireUserId();
 
   const member = await getMemberForUser(userId);
   if (!member) redirect("/join");
