@@ -193,7 +193,7 @@ baby-tracker/
 - [x] **Verificar la migración vía MCP de Supabase:** `_prisma_migrations`, tablas, RLS, políticas, publicación y *advisors* de seguridad.
 - [x] `prisma/seed.ts` con una familia, un bebé y unos 3 días de datos realistas (solo en dev).
 - [x] Singleton de `PrismaClient` en `src/lib/db.ts` con `PrismaPg` sobre `DATABASE_URL`, protegido con `server-only`.
-- [x] Supabase Auth: clientes `@supabase/ssr` (servidor y navegador), refresco de sesión en `src/proxy.ts` y login con email + código de 8 dígitos (SMTP propio con `{{ .Token }}` en la plantilla).
+- [x] Supabase Auth: clientes `@supabase/ssr` (servidor y navegador), refresco de sesión en `src/proxy.ts` y login con email + código de 8 dígitos (SMTP propio con `{{ .Token }}` en las plantillas *Magic Link* y *Confirm signup*).
 - [x] Helper `requireMember()` que devuelve `userId` y `householdId`, o redirige al login.
 - [x] Helpers de fechas en `src/lib/dates.ts` (inicio/fin de día en la zona del hogar, duraciones, formato en español).
 
@@ -225,10 +225,10 @@ baby-tracker/
 
 **Objetivo:** registrar y consultar cada módulo desde el móvil con una mano.
 
-- [ ] Pantallas de acceso: login con email + código, crear familia y bebé, e invitar o unirse con código (el código se muestra una sola vez: botones "Compartir" y "Generar otro").
+- [x] Pantallas de acceso: login con email + código, crear familia y bebé, e invitar o unirse con código (el código se muestra una sola vez: botones "Compartir" y "Generar otro"). *(`/join`, `/join/create`, `/join/code` y `/settings/invite`; decisiones 046–048.)*
 - [ ] Ajustes de familia: ver miembros e invitación pendiente, y expulsar a un miembro (respuesta si un código se filtra antes de que se una la pareja).
-- [ ] Layout base: `PageHeader`, `BottomNav` (Hoy · Tomas · Pañales · Sueño · Más), contenedor `max-w-md` y *safe areas* de iOS.
-- [ ] Componentes compartidos: `DateTimeField` con atajos ("Ahora", "−5 min", "−15 min", "−30 min"), `NumberStepper`, `ChoiceGrid` (opciones como botones grandes), `SubmitButton` con estado pendiente y `EmptyState`.
+- [ ] Layout base: `PageHeader`, `BottomNav` (Hoy · Tomas · Pañales · Sueño · Más), contenedor `max-w-md` y *safe areas* de iOS. *(`PageHeader` ya existe.)*
+- [ ] Componentes compartidos: `DateTimeField` con atajos ("Ahora", "−5 min", "−15 min", "−30 min"), `NumberStepper`, `ChoiceGrid` (opciones como botones grandes), `SubmitButton` con estado pendiente y `EmptyState`. *(Ya existen `SubmitButton`, `TextField`, `FormFooter`, `FormSkeleton` y `LinkCard`.)*
 - [ ] **Alimentación:** botones "Pecho izq." / "Pecho der." con cronómetro, sugerencia del siguiente pecho, biberón con cantidades rápidas (60 / 90 / 120 / 150 ml) e historial del día.
 - [ ] **Pañales:** registro en un toque (Mojado / Sucio / Mixto) y detalle opcional de color y textura con muestras visuales y texto.
 - [ ] **Sueño:** cronómetro grande iniciar / parar y entrada manual.
@@ -237,7 +237,7 @@ baby-tracker/
 - [ ] Autoría visible y discreta en historiales ("por Ana").
 - [ ] Editar y borrar registros (confirmación con `AlertDialog`) y "Deshacer" en el toast tras crear.
 - [ ] Mensaje claro cuando hay conflicto (p. ej. "Ya hay una siesta en curso, iniciada por Ana").
-- [ ] `loading.tsx` (skeletons), `error.tsx` y `not-found.tsx` en cada segmento.
+- [ ] `loading.tsx` (skeletons), `error.tsx` y `not-found.tsx` en cada segmento. *(`error.tsx` con `retry()` ya existe en `(auth)` y `(app)`.)*
 - [ ] Revisión de accesibilidad: objetivos táctiles ≥ 48 px, contraste AA, foco visible y etiquetas.
 
 **Criterio de salida:** flujo completo de cada módulo probado en un móvil real (o emulación de 375 × 667) en modo claro y oscuro.
@@ -281,7 +281,7 @@ baby-tracker/
 **Despliegue**
 
 - [ ] Vercel (u otra plataforma) con las funciones en una región de la UE próxima a Supabase.
-- [ ] Proyecto de Supabase **prod** en la UE, igual que dev: `prisma/platform/supabase-bootstrap.sql`, Data API desactivada, SMTP propio con `{{ .Token }}` en la plantilla y longitud del código OTP en 8.
+- [ ] Proyecto de Supabase **prod** en la UE, igual que dev: `prisma/platform/supabase-bootstrap.sql`, Data API desactivada, SMTP propio con `{{ .Token }}` en **las dos** plantillas, *Magic Link* y *Confirm signup* (un email nuevo recibe *Confirm signup*, porque `signInWithOtp` lo da de alta), y longitud del código OTP en 8.
 - [ ] Variables de entorno de producción (incluida `DATABASE_CA_CERT`) y `prisma migrate deploy` contra el proyecto **prod**, verificado vía MCP.
 
 **Criterio de salida:**
