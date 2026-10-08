@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 
+import { getInviteExpiry, hashInviteCode } from "@/features/household/service";
 import type { HouseholdRole } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
 
@@ -57,4 +58,22 @@ export async function createFamily(): Promise<{
   const { userId } = await createMember(householdId);
   const { babyId } = await createBaby(householdId);
   return { householdId, userId, babyId };
+}
+
+/** Stores the invite the way the app does: only the hash of `code`. */
+export async function createInvite(
+  householdId: string,
+  input: { code: string; createdById: string; expiresAt?: Date; usedAt?: Date },
+): Promise<{ inviteId: string }> {
+  const { id } = await db.householdInvite.create({
+    data: {
+      householdId,
+      codeHash: hashInviteCode(input.code),
+      expiresAt: input.expiresAt ?? getInviteExpiry(new Date()),
+      usedAt: input.usedAt,
+      createdById: input.createdById,
+    },
+    select: { id: true },
+  });
+  return { inviteId: id };
 }
