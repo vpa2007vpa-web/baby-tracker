@@ -3,6 +3,7 @@ import "server-only";
 import { createServerClient } from "@supabase/ssr";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
+import { connection } from "next/server";
 
 import { env } from "@/lib/env";
 
@@ -33,6 +34,10 @@ export async function createSupabaseServerClient(): Promise<SupabaseClient> {
  * Token refresh happens earlier, in src/proxy.ts, on every request.
  */
 export async function createSupabaseReadOnlyServerClient(): Promise<SupabaseClient> {
+  // getClaims() reads the clock (Date.now()) to check token expiry whenever a
+  // session exists. Cookies alone may be read during Cache Components'
+  // runtime prerender, the clock may not: defer session reads to request time.
+  await connection();
   const cookieStore = await cookies();
   return createServerClient(
     env.NEXT_PUBLIC_SUPABASE_URL,
