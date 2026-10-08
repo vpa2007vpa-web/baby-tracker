@@ -1,7 +1,12 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 
-import { handleActionError, ok, validationError } from "@/lib/action-result";
+import {
+  handleActionError,
+  NotFoundError,
+  ok,
+  validationError,
+} from "@/lib/action-result";
 
 function prismaError(code: string, message: string): Error {
   return Object.assign(new Error(message), {
@@ -48,6 +53,19 @@ describe("handleActionError", () => {
     const conflict = handleActionError("test", prismaError("P2002", "x"));
     expect(notFound).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
     expect(conflict).toMatchObject({ ok: false, error: { code: "CONFLICT" } });
+  });
+
+  it("maps NotFoundError exactly like Prisma P2025, without logging it", () => {
+    const log = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const fromAuthorization = handleActionError("test", new NotFoundError());
+    const fromPrisma = handleActionError("test", prismaError("P2025", "x"));
+
+    expect(fromAuthorization).toEqual(fromPrisma);
+    expect(fromAuthorization).toMatchObject({
+      ok: false,
+      error: { code: "NOT_FOUND" },
+    });
+    expect(log).not.toHaveBeenCalled();
   });
 
   it("returns a generic message and never logs the raw error message", () => {

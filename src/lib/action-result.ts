@@ -16,6 +16,15 @@ export type ActionResult<T = void> =
   { ok: true; data: T } | { ok: false; error: ActionError };
 
 const UNEXPECTED_MESSAGE = "Algo ha fallado. Inténtalo de nuevo.";
+const NOT_FOUND_MESSAGE = "No hemos encontrado ese registro.";
+
+/**
+ * Thrown by authorization checks. "Belongs to another household" and "does
+ * not exist" must look identical to the client (CLAUDE.md §2.7).
+ */
+export class NotFoundError extends Error {
+  override name = "NotFoundError";
+}
 
 export function ok(): ActionResult<void>;
 export function ok<T>(data: T): ActionResult<T>;
@@ -67,8 +76,8 @@ export function handleActionError(
   error: unknown,
 ): ActionResult<never> {
   const code = readPrismaErrorCode(error);
-  if (code === "P2025") {
-    return actionError("NOT_FOUND", "No hemos encontrado ese registro.");
+  if (error instanceof NotFoundError || code === "P2025") {
+    return actionError("NOT_FOUND", NOT_FOUND_MESSAGE);
   }
   if (code === "P2002") {
     return actionError("CONFLICT", "Ese registro ya existe.");
