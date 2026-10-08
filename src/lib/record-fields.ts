@@ -86,3 +86,6 @@ export function optionalText(maxLength: number): OptionalTextSchema {
 
 /** Notes on any record. */
 export const NOTES_MAX_LENGTH = 500;
+
+/** Client-generated UUID of a record (decision 016). */
+export const recordId = z.uuid({ error: "Identificador no válido." });

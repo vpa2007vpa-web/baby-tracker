@@ -1,7 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 
-import { formNumber, localDateTime, optionalText } from "@/lib/record-fields";
+import {
+  formNumber,
+  localDateTime,
+  optionalText,
+  recordId,
+} from "@/lib/record-fields";
 
 const MADRID = "Europe/Madrid";
 
@@ -90,6 +95,14 @@ describe("optionalText", () => {
   it("limits the length", () => {
     expect(firstMessage(notes.safeParse("demasiado"))).toBe(
       "Usa 5 caracteres como máximo.",
+    );
+  });
+});
+
+describe("recordId", () => {
+  it("explains a malformed id in Spanish", () => {
+    expect(firstMessage(recordId.safeParse("1"))).toBe(
+      "Identificador no válido.",
     );
   });
 });
