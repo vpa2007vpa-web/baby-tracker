@@ -31,3 +31,11 @@ const uuidSchema = z.uuid();
 export function isUuid(value: string): boolean {
   return uuidSchema.safeParse(value).success;
 }
+
+/**
+ * How far before a day the session listings (sleep, breast feedings) look
+ * for sessions that spill into it, so the (baby_id, started_at) index scans a
+ * bounded range. It covers every hand-typed session (at most 16 h); a running
+ * session is matched on its own, however old.
+ */
+export const SESSION_LOOKBACK_MS = 24 * 60 * 60 * 1000;
