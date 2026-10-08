@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 
 import {
+  checkSessionTimes,
   formNumber,
   localDateTime,
   optionalText,
@@ -103,6 +104,34 @@ describe("recordId", () => {
   it("explains a malformed id in Spanish", () => {
     expect(firstMessage(recordId.safeParse("1"))).toBe(
       "Identificador no válido.",
+    );
+  });
+});
+
+describe("checkSessionTimes", () => {
+  const HOUR_MS = 60 * 60 * 1000;
+  const nap = z
+    .object({ startedAt: z.date(), endedAt: z.date() })
+    .superRefine(checkSessionTimes(2 * HOUR_MS, "Demasiado larga."));
+  const start = new Date("2026-10-01T10:00:00Z");
+
+  it("accepts a session that ends after it starts, within the limit", () => {
+    const endedAt = new Date(start.getTime() + 2 * HOUR_MS);
+    expect(nap.safeParse({ startedAt: start, endedAt }).success).toBe(true);
+  });
+
+  it("rejects an end before or at the start, on the end field", () => {
+    const result = nap.safeParse({ startedAt: start, endedAt: start });
+    expect(result.error?.issues[0]).toMatchObject({
+      path: ["endedAt"],
+      message: "La hora de fin debe ser posterior a la de inicio.",
+    });
+  });
+
+  it("rejects an implausibly long session", () => {
+    const endedAt = new Date(start.getTime() + 2 * HOUR_MS + 60_000);
+    expect(firstMessage(nap.safeParse({ startedAt: start, endedAt }))).toBe(
+      "Demasiado larga.",
     );
   });
 });

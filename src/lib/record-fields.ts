@@ -89,3 +89,32 @@ export const NOTES_MAX_LENGTH = 500;
 
 /** Client-generated UUID of a record (decision 016). */
 export const recordId = z.uuid({ error: "Identificador no válido." });
+
+type SessionTimes = { startedAt: Date; endedAt: Date };
+
+/**
+ * Refinement for sessions typed by hand (a nap, a breast feeding): the end
+ * comes after the start and the length is plausible. Issues land on
+ * `endedAt`, the field the parent usually got wrong.
+ */
+export function checkSessionTimes(
+  maxDurationMs: number,
+  tooLongMessage: string,
+): (session: SessionTimes, ctx: z.RefinementCtx) => void {
+  return (session, ctx) => {
+    const durationMs = session.endedAt.getTime() - session.startedAt.getTime();
+    if (durationMs <= 0) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["endedAt"],
+        message: "La hora de fin debe ser posterior a la de inicio.",
+      });
+    } else if (durationMs > maxDurationMs) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["endedAt"],
+        message: tooLongMessage,
+      });
+    }
+  };
+}
