@@ -20,20 +20,23 @@ describe("requestEmailOtpSchema", () => {
 });
 
 describe("verifyEmailOtpSchema", () => {
-  it("accepts exactly six digits", () => {
+  it("accepts exactly eight digits, as Supabase Auth sends them", () => {
     expect(
       verifyEmailOtpSchema.parse({
         email: "ana@example.com",
-        token: " 012345 ",
+        token: " 01234567 ",
       }),
-    ).toEqual({ email: "ana@example.com", token: "012345" });
+    ).toEqual({ email: "ana@example.com", token: "01234567" });
   });
 
-  it.each(["12345", "1234567", "12a456", ""])("rejects token %j", (token) => {
-    const result = verifyEmailOtpSchema.safeParse({
-      email: "ana@example.com",
-      token,
-    });
-    expect(result.success).toBe(false);
-  });
+  it.each(["123456", "1234567", "123456789", "1234a567", ""])(
+    "rejects token %j",
+    (token) => {
+      const result = verifyEmailOtpSchema.safeParse({
+        email: "ana@example.com",
+        token,
+      });
+      expect(result.success).toBe(false);
+    },
+  );
 });

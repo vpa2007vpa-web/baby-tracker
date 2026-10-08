@@ -210,7 +210,7 @@ export async function createDiaperChange(
 ### 2.7 Autenticación y autorización (Supabase Auth)
 
 - Supabase Auth con `@supabase/ssr`: clientes en `src/lib/supabase/server.ts` y `src/lib/supabase/client.ts`; refresco de sesión en `src/proxy.ts` (nombre de `middleware.ts` en Next.js 16).
-- Método de acceso: **email + código OTP de 6 dígitos**. No se usan enlaces mágicos porque en iOS abren Safari y no la PWA instalada, y la sesión quedaría fuera de la app. Sesiones de larga duración.
+- Método de acceso: **email + código OTP de 8 dígitos** (la longitud configurada en Supabase Auth; `OTP_LENGTH` en `features/auth/schemas.ts` debe coincidir). No se usan enlaces mágicos porque en iOS abren Safari y no la PWA instalada, y la sesión quedaría fuera de la app. Sesiones de larga duración.
 - En el servidor, la identidad se valida con `supabase.auth.getClaims()` (o `getUser()`). **Nunca** confiar en `getSession()` en código de servidor.
 - **Prisma se conecta con un rol que ignora RLS, así que la autorización en código es obligatoria:**
   - `requireMember()` en cada página y action;
@@ -500,6 +500,7 @@ Añadir una fila por cada decisión de arquitectura nueva o modificada. No borra
 | 033 | 2026-10-08 | Variables de entorno en dos módulos: `src/lib/env.ts` (`server-only`, sin `DIRECT_URL`, `DATABASE_URL` obligada al puerto 6543) y `src/lib/public-env.ts` (solo `NEXT_PUBLIC_*`, para el cliente). | Next.js solo inyecta las `NEXT_PUBLIC_*` referenciadas literalmente; la app no puede usar `DIRECT_URL` por error. |
 | 034 | 2026-10-08 | Login en dos pasos dentro de `/login` (el email vive en estado del cliente, no en la URL), con *actions* `requestEmailOtp` / `verifyEmailOtp` / `signOut`. `requireMember()` redirige a `/login` sin sesión y a `/join` sin familia. Cliente Supabase de solo lectura en Server Components. | Ningún dato personal en la URL ni en los logs; el refresco de sesión ocurre en `proxy.ts`. |
 | 035 | 2026-10-08 | `npm run typecheck` = `next typegen && tsc --noEmit`. | Los tipos de rutas de Next (`LayoutProps`, `PageProps`) se regeneran antes de comprobar. |
+| 036 | 2026-10-08 | El código OTP de email tiene **8 dígitos** (sustituye a los 6 de la regla 2.7 original). `OTP_LENGTH` es la única fuente en el código y las casillas de `InputOTP` se reparten el ancho. | Es la longitud que envía Supabase Auth en este proyecto; 8 casillas fijas de 48 px no caben en 375 px. |
 
 ---
 

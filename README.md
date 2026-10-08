@@ -193,7 +193,7 @@ baby-tracker/
 - [x] **Verificar la migración vía MCP de Supabase:** `_prisma_migrations`, tablas, RLS, políticas, publicación y *advisors* de seguridad.
 - [ ] `prisma/seed.ts` con una familia, un bebé y unos 3 días de datos realistas (solo en dev). *(Escrito; se ejecuta tras el primer inicio de sesión con `SEED_OWNER_USER_ID`.)*
 - [x] Singleton de `PrismaClient` en `src/lib/db.ts` con `PrismaPg` sobre `DATABASE_URL`, protegido con `server-only`.
-- [ ] Supabase Auth: clientes `@supabase/ssr` (servidor y navegador), refresco de sesión en `src/proxy.ts` y login con email + código de 6 dígitos. *(Implementado; falta comprobar un inicio de sesión real: la plantilla de email del plan Free no incluye el código.)*
+- [ ] Supabase Auth: clientes `@supabase/ssr` (servidor y navegador), refresco de sesión en `src/proxy.ts` y login con email + código de 8 dígitos. *(SMTP propio y plantilla con `{{ .Token }}` configurados; falta el primer inicio de sesión real.)*
 - [x] Helper `requireMember()` que devuelve `userId` y `householdId`, o redirige al login.
 - [x] Helpers de fechas en `src/lib/dates.ts` (inicio/fin de día en la zona del hogar, duraciones, formato en español).
 

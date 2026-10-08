@@ -72,7 +72,11 @@ export function CodeStep({ email, onChangeEmail }: CodeStepProps): ReactNode {
         control={form.control}
         render={({ field, fieldState }) => (
           <Field data-invalid={fieldState.invalid}>
-            <FieldLabel htmlFor="login-code">Código de 6 dígitos</FieldLabel>
+            <FieldLabel htmlFor="login-code">
+              Código de {OTP_LENGTH} dígitos
+            </FieldLabel>
+            {/* Slots share the full width: 8 fixed 48 px slots would overflow
+                a 375 px screen. The tap target is the whole row. */}
             <InputOTP
               id="login-code"
               maxLength={OTP_LENGTH}
@@ -85,13 +89,14 @@ export function CodeStep({ email, onChangeEmail }: CodeStepProps): ReactNode {
               onBlur={field.onBlur}
               onComplete={() => void form.handleSubmit(onSubmit)()}
               aria-invalid={fieldState.invalid}
+              containerClassName="w-full"
             >
-              <InputOTPGroup>
+              <InputOTPGroup className="w-full">
                 {SLOT_INDEXES.map((index) => (
                   <InputOTPSlot
                     key={index}
                     index={index}
-                    className="size-12 text-xl"
+                    className="h-12 min-w-0 flex-1 text-xl tabular-nums"
                   />
                 ))}
               </InputOTPGroup>
