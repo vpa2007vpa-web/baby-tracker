@@ -205,7 +205,7 @@ baby-tracker/
 
 - [x] Tipo `ActionResult<T>` y helpers (`ok`, `validationError`, `handleActionError`). *(Adelantado a la Fase 1: lo necesitan las acciones de login.)*
 - [x] Autorización en todas las queries y actions: `requireMember()` y comprobación de que el `babyId` pertenece a la familia del usuario (`assertBabyInHousehold()`, `requireBaby()`; cada query y action nueva los usa).
-- [ ] Familia: crear familia y bebé, generar código de invitación (con caducidad) y unirse con código.
+- [x] Familia: crear familia y bebé, generar código de invitación (con caducidad) y unirse con código (`features/household`: código Crockford de 10 caracteres, solo su hash en la BD, 24 h, un solo uso, máximo 2 miembros, canje atómico; ADR-043).
 - [ ] Esquemas Zod por módulo (alta y edición) con mensajes en español y reglas cruzadas: `endedAt > startedAt`, `amountMl` obligatorio en biberón, al menos una medida en crecimiento, rangos plausibles, sin fechas futuras.
 - [ ] Queries por módulo: listado por día, detalle, último registro y sesión activa.
 - [ ] Server Actions CRUD por módulo, **idempotentes**: el cliente envía el UUID del registro, así que un doble toque o un reintento no duplica nada. Todas guardan `createdById`.
@@ -225,7 +225,8 @@ baby-tracker/
 
 **Objetivo:** registrar y consultar cada módulo desde el móvil con una mano.
 
-- [ ] Pantallas de acceso: login con email + código, crear familia y bebé, e invitar o unirse con código.
+- [ ] Pantallas de acceso: login con email + código, crear familia y bebé, e invitar o unirse con código (el código se muestra una sola vez: botones "Compartir" y "Generar otro").
+- [ ] Ajustes de familia: ver miembros e invitación pendiente, y expulsar a un miembro (respuesta si un código se filtra antes de que se una la pareja).
 - [ ] Layout base: `PageHeader`, `BottomNav` (Hoy · Tomas · Pañales · Sueño · Más), contenedor `max-w-md` y *safe areas* de iOS.
 - [ ] Componentes compartidos: `DateTimeField` con atajos ("Ahora", "−5 min", "−15 min", "−30 min"), `NumberStepper`, `ChoiceGrid` (opciones como botones grandes), `SubmitButton` con estado pendiente y `EmptyState`.
 - [ ] **Alimentación:** botones "Pecho izq." / "Pecho der." con cronómetro, sugerencia del siguiente pecho, biberón con cantidades rápidas (60 / 90 / 120 / 150 ml) e historial del día.

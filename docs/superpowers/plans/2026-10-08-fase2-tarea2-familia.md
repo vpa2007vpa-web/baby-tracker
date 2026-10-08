@@ -14,7 +14,7 @@
 
 ## ADR-043: Códigos de invitación a la familia
 
-**Status:** Proposed · **Date:** 2026-10-08 · **Deciders:** Vicente
+**Status:** Accepted · **Date:** 2026-10-08 · **Deciders:** Vicente
 
 ### Context
 
@@ -955,8 +955,8 @@ export async function joinHousehold(input: unknown): Promise<ActionResult> {
 - Pantallas: `/join` como entrada (dos botones grandes: "Crear familia" / "Tengo un código"), `/join/create`, `/join/code`, y en Ajustes "Invitar" con **Compartir** (Web Share API) y **Generar otro**.
 - Expulsar a un miembro y transferir el rol `OWNER`.
 
-## Decisiones pendientes (bloquean Task 1 y Task 2)
+## Decisiones (aprobadas el 2026-10-08)
 
-- **D1 · Almacenamiento del código:** SHA-256 en `code_hash` (recomendado, requiere la migración de la Task 1) · texto plano (sin migración; un código visible en la tabla sirve para entrar).
-- **D2 · Caducidad:** 24 h (recomendado) · 72 h · 7 días.
-- **D3 · Miembros por familia:** máximo 2 (recomendado) · sin límite.
+- **D1 · Almacenamiento:** SHA-256 en `code_hash`.
+- **D2 · Caducidad:** 24 h.
+- **D3 · Miembros por familia:** máximo 2.
