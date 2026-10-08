@@ -2,7 +2,7 @@ import { fileURLToPath } from "node:url";
 
 import { defineConfig } from "vitest/config";
 
-import { integrationEnv } from "./src/test/integration-env";
+import { integrationEnv } from "./src/test/integration-env.ts";
 
 const fromRoot = (path: string): string =>
   fileURLToPath(new URL(path, import.meta.url));

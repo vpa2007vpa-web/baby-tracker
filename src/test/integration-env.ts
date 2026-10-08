@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 
 // Relative import: vitest.config.ts evaluates this file before the `@/` alias
 // exists.
-import { TEST_DATABASE, withDatabase } from "../../scripts/database-url";
+import { TEST_DATABASE, withDatabase } from "../../scripts/database-url.ts";
 
 /**
  * Env for the integration project: the app's own DATABASE_URL (transaction
