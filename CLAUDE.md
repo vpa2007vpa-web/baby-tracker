@@ -507,6 +507,7 @@ Añadir una fila por cada decisión de arquitectura nueva o modificada. No borra
 | 039 | 2026-10-08 | `NotFoundError` (en `lib/action-result.ts`) para las comprobaciones de autorización; `handleActionError` lo traduce al mismo `NOT_FOUND` que `P2025`. `assertBabyInHousehold()` responde igual a ids ajenos, inexistentes o mal formados. | Ningún recurso de otra familia es distinguible de uno que no existe (regla 2.7). |
 | 040 | 2026-10-08 | `requireBaby()` es el punto de entrada de las páginas de módulos; el bebé del MVP es el primero creado en la familia (`getPrimaryBaby`). | Una sola llamada da miembro y bebé; el esquema ya admite varios bebés para el selector del backlog. |
 | 041 | 2026-10-08 | El paquete es **ESM** (`"type": "module"`). Los archivos que carga la configuración de Vitest importan con extensión `.ts` explícita (`allowImportingTsExtensions`, válido porque `noEmit`). | Vite pasará a cargar la configuración con el ESM nativo de Node, que no acepta sintaxis ESM en paquetes CommonJS ni imports relativos sin extensión. |
+| 042 | 2026-10-08 | El aviso de seguridad de Supabase *Leaked Password Protection Disabled* se **acepta como falso positivo**. | La app solo autentica con código OTP por email: no existe ningún flujo con contraseña que comprobar. Revisar si algún día se añaden contraseñas. |
 
 ---
 
