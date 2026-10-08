@@ -4,6 +4,9 @@ import type { ReactNode } from "react";
 
 import { SignOutButton } from "@/features/auth/components/sign-out-button";
 import { requireMember } from "@/features/auth/session";
+import { InvitePartnerCard } from "@/features/household/components/invite-partner-card";
+import { listHouseholdMembers } from "@/features/household/queries";
+import { MAX_HOUSEHOLD_MEMBERS } from "@/features/household/service";
 import { cn } from "@/lib/utils";
 
 // Temporary signed-in screen for phase 1: replaced by the "Hoy" dashboard in
@@ -49,6 +52,8 @@ const MODULES: ReadonlyArray<{
 
 export default async function HomePage(): Promise<ReactNode> {
   const member = await requireMember();
+  const members = await listHouseholdMembers(member.householdId);
+  const canInvite = members.length < MAX_HOUSEHOLD_MEMBERS;
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 pt-8 pb-[max(1rem,env(safe-area-inset-bottom))]">
@@ -58,6 +63,8 @@ export default async function HomePage(): Promise<ReactNode> {
           Todo listo para empezar a registrar.
         </p>
       </header>
+
+      {canInvite && <InvitePartnerCard />}
 
       <ul className="flex flex-col gap-3">
         {MODULES.map(({ label, icon: Icon, surfaceClass, iconClass }) => (
