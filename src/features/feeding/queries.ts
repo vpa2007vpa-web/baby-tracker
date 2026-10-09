@@ -1,7 +1,7 @@
 import "server-only";
 
 import type { BreastSide } from "@/features/feeding/service";
-import type { Prisma } from "@/generated/prisma/client";
+import type { BottleContent, Prisma } from "@/generated/prisma/client";
 import type { DayRange } from "@/lib/dates";
 import { db } from "@/lib/db";
 import { isUuid, SESSION_LOOKBACK_MS } from "@/lib/records";
@@ -98,4 +98,21 @@ export async function getLastBreastFeeding(
   // Excluded by the query; the check narrows the type for callers.
   if (!feeding || feeding.type === "BOTTLE") return null;
   return { ...feeding, type: feeding.type };
+}
+
+/**
+ * Amount and milk of the latest bottle: the defaults of the next one
+ * (CLAUDE.md §4.2, "última cantidad de biberón").
+ */
+export async function getLastBottleFeeding(
+  babyId: string,
+): Promise<{ amountMl: number; bottleContent: BottleContent } | null> {
+  const bottle = await db.feeding.findFirst({
+    where: { babyId, type: "BOTTLE" },
+    orderBy: { startedAt: "desc" },
+    select: { amountMl: true, bottleContent: true },
+  });
+  // Both are required for bottles by the schema; the check narrows the type.
+  if (!bottle?.amountMl || !bottle.bottleContent) return null;
+  return { amountMl: bottle.amountMl, bottleContent: bottle.bottleContent };
 }

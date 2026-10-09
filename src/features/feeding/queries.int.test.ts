@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   getActiveFeeding,
   getFeeding,
+  getLastBottleFeeding,
   getLastBreastFeeding,
   getLastFeeding,
   listFeedingsByDay,
@@ -144,5 +145,47 @@ describe("getFeeding", () => {
     });
     await expect(getFeeding(mine.babyId, foreign.id)).resolves.toBeNull();
     await expect(getFeeding(mine.babyId, "not-a-uuid")).resolves.toBeNull();
+  });
+});
+
+describe("getLastBottleFeeding", () => {
+  it("returns the amount and milk of the latest bottle, ignoring breast feedings", async () => {
+    const family = await createFamily();
+    const author = { createdById: family.userId };
+    await createFeeding(family.babyId, {
+      ...author,
+      type: "BOTTLE",
+      startedAt: new Date("2026-10-01T07:00:00Z"),
+      amountMl: 90,
+      bottleContent: "BREAST_MILK",
+    });
+    await createFeeding(family.babyId, {
+      ...author,
+      type: "BOTTLE",
+      startedAt: new Date("2026-10-01T10:00:00Z"),
+      amountMl: 120,
+      bottleContent: "FORMULA",
+    });
+    await createFeeding(family.babyId, {
+      ...author,
+      startedAt: new Date("2026-10-01T12:00:00Z"),
+      endedAt: new Date("2026-10-01T12:20:00Z"),
+    });
+
+    await expect(getLastBottleFeeding(family.babyId)).resolves.toEqual({
+      amountMl: 120,
+      bottleContent: "FORMULA",
+    });
+  });
+
+  it("returns null without bottles, and never another baby's", async () => {
+    const family = await createFamily();
+    const sibling = await createBaby(family.householdId);
+    await createFeeding(sibling.babyId, {
+      createdById: family.userId,
+      type: "BOTTLE",
+    });
+
+    await expect(getLastBottleFeeding(family.babyId)).resolves.toBeNull();
   });
 });
