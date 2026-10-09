@@ -89,6 +89,14 @@
    * never hidden under the bar.
    */
   --bottom-nav-height: 4rem;
+  /*
+   * Toasts float above the bottom bar (and, on task screens, above the
+   * primary button of the form footer, which is shorter than the bar plus
+   * this gap). Read by the <Toaster> of the root layout.
+   */
+  --toast-offset-bottom: calc(
+    var(--bottom-nav-height) + env(safe-area-inset-bottom) + 0.75rem
+  );
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);

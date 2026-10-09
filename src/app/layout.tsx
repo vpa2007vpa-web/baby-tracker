@@ -15,6 +15,10 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// Sonner copies the string into its --offset-bottom / --mobile-offset-bottom
+// custom properties, so the geometry stays in globals.css.
+const TOAST_OFFSET = { bottom: "var(--toast-offset-bottom)" };
+
 export const metadata: Metadata = {
   title: "Métricas Bebé",
   description:
@@ -53,7 +57,9 @@ export default function RootLayout({ children }: LayoutProps<"/">): ReactNode {
           disableTransitionOnChange
         >
           {children}
-          <Toaster />
+          {/* Above the bottom bar, on phones (mobileOffset) and on wider
+              screens, where the bar still spans the full width. */}
+          <Toaster offset={TOAST_OFFSET} mobileOffset={TOAST_OFFSET} />
         </ThemeProvider>
       </body>
     </html>
