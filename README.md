@@ -229,12 +229,12 @@ baby-tracker/
 - [x] Componentes compartidos: `DateTimeField` con atajos ("Ahora", "−5 min", "−15 min", "−30 min"), `NumberStepper`, `ChoiceGrid` (opciones como botones grandes), `SubmitButton` con estado pendiente y `EmptyState`. *(Además `DayNav`, `TextField`, `FormFooter`, `FormSkeleton`, `LinkCard`, `DeleteRecordButton`, `offerUndo` y `useSingleFlight`; decisiones 057 y 060.)*
 - [x] **Alimentación:** botones "Pecho izq." / "Pecho der." con cronómetro, sugerencia del siguiente pecho, biberón con cantidades rápidas (60 / 90 / 120 / 150 ml) e historial del día. *(Cronómetro compartido con "Cambiar de pecho" y "Parar", biberón en dos toques precargado con el último, alta con otra hora, edición y borrado con autoría y `?day=`; decisiones 059–061.)*
 - [x] **Pañales:** registro en un toque (Mojado / Sucio / Mixto) y detalle opcional de color y textura con muestras visuales y texto. *(Historial por día con `?day=`, alta con otra hora, edición y borrado con autoría; decisiones 056–058.)*
-- [ ] **Sueño:** cronómetro grande iniciar / parar y entrada manual.
+- [x] **Sueño:** cronómetro grande iniciar / parar y entrada manual. *(Inicio tardío «hace 5 / 10 / 15 min» calculado en el servidor y sin solaparse con el sueño anterior, historial con `?day=` y noches en los dos días, edición y borrado de siestas terminadas; decisión 062.)*
 - [ ] **Crecimiento:** formulario de medidas e historial.
 - [ ] **Vacunas / Salud:** alta de vacuna o medicamento, historial y reacciones.
 - [ ] Autoría visible y discreta en historiales ("por Ana").
 - [ ] Editar y borrar registros (confirmación con `AlertDialog`) y "Deshacer" en el toast tras crear.
-- [ ] Mensaje claro cuando hay conflicto (p. ej. "Ya hay una siesta en curso, iniciada por Ana").
+- [x] Mensaje claro cuando hay conflicto (p. ej. "Ya hay una siesta en curso, iniciada por Ana"). *(Los únicos conflictos son los de los cronómetros de Tomas y Sueño; decisiones 051, 059 y 062.)*
 - [ ] `loading.tsx` (skeletons), `error.tsx` y `not-found.tsx` en cada segmento. *(`error.tsx` con `retry()` ya existe en `(auth)` y `(app)`.)*
 - [ ] Revisión de accesibilidad: objetivos táctiles ≥ 48 px, contraste AA, foco visible y etiquetas.
 
