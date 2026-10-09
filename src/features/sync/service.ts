@@ -1,3 +1,5 @@
+import { assertNever } from "@/lib/assert-never";
+
 // Pure pieces of RealtimeSync (CLAUDE.md §2.8): how the household channel
 // is doing, what the connection indicator says, and the refresh debounce.
 
@@ -20,6 +22,8 @@ export function toChannelState(status: SubscribeStatus): ChannelState {
       return "errored";
     case "CLOSED":
       return "closed";
+    default:
+      return assertNever(status);
   }
 }
 
