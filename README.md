@@ -223,8 +223,10 @@ baby-tracker/
 
 **Objetivo:** registrar y consultar cada módulo desde el móvil con una mano.
 
+**Estado:** terminada el 2026-10-09.
+
 - [x] Pantallas de acceso: login con email + código, crear familia y bebé, e invitar o unirse con código (el código se muestra una sola vez: botones "Compartir" y "Generar otro"). *(`/join`, `/join/create`, `/join/code` y `/settings/invite`; decisiones 046–048.)*
-- [ ] Ajustes de familia: ver miembros e invitación pendiente, y expulsar a un miembro (respuesta si un código se filtra antes de que se una la pareja).
+- [x] Ajustes de familia: ver miembros e invitación pendiente, y expulsar a un miembro (respuesta si un código se filtra antes de que se una la pareja). *(Solo quien creó la familia expulsa; expulsar revoca los códigos pendientes y "Anular código" los invalida, bajo el mismo bloqueo que el canje; interruptor de tema; decisión 064.)*
 - [x] Layout base: `PageHeader`, `BottomNav` (Hoy · Tomas · Pañales · Sueño · Más), contenedor `max-w-md` y *safe areas* de iOS. *(Grupos `(tabs)` y `(task)`, pantalla Más y pantallas provisionales por módulo; decisiones 054 y 055.)*
 - [x] Componentes compartidos: `DateTimeField` con atajos ("Ahora", "−5 min", "−15 min", "−30 min"), `NumberStepper`, `ChoiceGrid` (opciones como botones grandes), `SubmitButton` con estado pendiente y `EmptyState`. *(Además `DayNav`, `TextField`, `FormFooter`, `FormSkeleton`, `LinkCard`, `DeleteRecordButton`, `offerUndo` y `useSingleFlight`; decisiones 057 y 060.)*
 - [x] **Alimentación:** botones "Pecho izq." / "Pecho der." con cronómetro, sugerencia del siguiente pecho, biberón con cantidades rápidas (60 / 90 / 120 / 150 ml) e historial del día. *(Cronómetro compartido con "Cambiar de pecho" y "Parar", biberón en dos toques precargado con el último, alta con otra hora, edición y borrado con autoría y `?day=`; decisiones 059–061.)*
@@ -236,7 +238,7 @@ baby-tracker/
 - [x] Editar y borrar registros (confirmación con `AlertDialog`) y "Deshacer" en el toast tras crear. *(En los cinco módulos; decisiones 056, 060 y 063.)*
 - [x] Mensaje claro cuando hay conflicto (p. ej. "Ya hay una siesta en curso, iniciada por Ana"). *(Los únicos conflictos son los de los cronómetros de Tomas y Sueño; decisiones 051, 059 y 062.)*
 - [x] `loading.tsx` (skeletons), `error.tsx` y `not-found.tsx` en cada segmento. *(`error.tsx` con `retry()` en `(auth)`, `(tabs)` y `(task)`; `loading.tsx` en `(tabs)` y `(task)`; `not-found.tsx` en `(task)` y en la raíz, y `global-error.tsx`; decisión 063.)*
-- [ ] Revisión de accesibilidad: objetivos táctiles ≥ 48 px, contraste AA, foco visible y etiquetas.
+- [x] Revisión de accesibilidad: objetivos táctiles ≥ 48 px, contraste AA, foco visible y etiquetas. *(Por módulo al cerrar cada uno y global el 2026-10-09; el contraste de los tokens lo protege `theme-tokens.test.ts`; decisiones 055, 058 y 061.)*
 
 **Criterio de salida:** flujo completo de cada módulo probado en un móvil real (o emulación de 375 × 667) en modo claro y oscuro.
 

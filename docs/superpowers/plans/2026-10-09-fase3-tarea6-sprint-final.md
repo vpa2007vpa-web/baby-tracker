@@ -57,7 +57,7 @@
 ### 4. Cierre de la Fase 3
 - [x] 13. `feat(app): add loading and not-found states to every segment`: `not-found.tsx` en `(tabs)` y `(auth)`; `loading.tsx` donde una página no tenga ya su `Suspense` con *skeleton*.
 - [x] 14. `docs`: decisiones nuevas, este plan, casillas del README («Crecimiento», «Vacunas / Salud», «Ajustes», «Autoría», «Editar y borrar», «Estados»).
-- [ ] Tras el QA con dos sesiones *(Crecimiento y Salud: superado; Ajustes: pendiente)*: `design:accessibility-review` **global** (casilla «Revisión de accesibilidad»), `engineering:code-review`, `design:design-system`; correcciones y cierre de la Fase 3.
+- [x] Tras el QA con dos sesiones *(Crecimiento, Salud y Ajustes superados; revisión global de accesibilidad el 2026-10-09)*: `design:accessibility-review` **global** (casilla «Revisión de accesibilidad»), `engineering:code-review`, `design:design-system`; correcciones y cierre de la Fase 3.
 
 ## Skills por tarea (regla 0.1)
 
