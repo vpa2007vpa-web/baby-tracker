@@ -34,13 +34,41 @@ describe("startSleepSessionSchema", () => {
     expect(result.startedAt).toBeUndefined();
   });
 
-  it("accepts an earlier start for the -5 / -15 min shortcuts", () => {
+  it("accepts an earlier start in the household zone", () => {
     const result = startSleepSessionSchema.parse({
       id: randomUUID(),
       babyId: randomUUID(),
       startedAt: "2026-10-01T09:30",
     });
     expect(result.startedAt).toEqual(new Date("2026-10-01T07:30:00Z"));
+  });
+
+  it("accepts the minutes ago of the quick shortcuts", () => {
+    const result = startSleepSessionSchema.parse({
+      id: randomUUID(),
+      babyId: randomUUID(),
+      minutesAgo: 15,
+    });
+    expect(result.minutesAgo).toBe(15);
+  });
+
+  it.each([-5, 2.5, 61])("refuses %s minutes ago", (minutesAgo) => {
+    const result = startSleepSessionSchema.safeParse({
+      id: randomUUID(),
+      babyId: randomUUID(),
+      minutesAgo,
+    });
+    expect(fieldErrors(result)).toHaveProperty("minutesAgo");
+  });
+
+  it("refuses a start time and minutes ago together", () => {
+    const result = startSleepSessionSchema.safeParse({
+      id: randomUUID(),
+      babyId: randomUUID(),
+      startedAt: "2026-10-01T09:30",
+      minutesAgo: 5,
+    });
+    expect(fieldErrors(result)).toHaveProperty("minutesAgo");
   });
 });
 

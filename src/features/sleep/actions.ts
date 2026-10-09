@@ -11,6 +11,7 @@ import {
   sleepSessionSchemas,
   stopSleepSessionSchema,
 } from "@/features/sleep/schemas";
+import { resolveSleepStart } from "@/features/sleep/service";
 import type { Prisma } from "@/generated/prisma/client";
 import {
   actionError,
@@ -91,17 +92,32 @@ export async function startSleepSession(
   const member = await requireMember();
   const parsed = schemas.startSleepSessionSchema.safeParse(input);
   if (!parsed.success) return validationError(parsed.error);
-  const { id, babyId } = parsed.data;
+  const { id, babyId, minutesAgo } = parsed.data;
   const now = new Date();
   // A start a few minutes ahead (phone clock drift, tolerated by the schema)
   // is clamped, so stopping right away never ends before it began.
-  const startedAt =
-    parsed.data.startedAt && parsed.data.startedAt < now
-      ? parsed.data.startedAt
-      : now;
+  const asked = resolveSleepStart({
+    now,
+    minutesAgo,
+    startedAt: parsed.data.startedAt,
+  });
 
   try {
     await assertBabyInHousehold(babyId, member.householdId);
+    // Only a start in the past can overlap the previous sleep.
+    const previous =
+      asked < now
+        ? await db.sleepSession.findFirst({
+            where: { babyId, endedAt: { gt: asked } },
+            orderBy: { endedAt: "desc" },
+            select: { endedAt: true },
+          })
+        : null;
+    const startedAt = resolveSleepStart({
+      now,
+      startedAt: asked,
+      previousEndedAt: previous?.endedAt,
+    });
     const session = await insertOnce(
       () =>
         db.sleepSession.create({

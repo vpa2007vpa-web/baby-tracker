@@ -90,6 +90,54 @@ describe("startSleepSession", () => {
     expect(stored.startedAt.getTime()).toBeLessThanOrEqual(Date.now());
   });
 
+  it("goes back the minutes asked on the server clock", async () => {
+    const family = await familyWithTwoParents();
+    const id = randomUUID();
+    const before = Date.now();
+
+    await startSleepSession({ id, babyId: family.babyId, minutesAgo: 15 });
+
+    const after = Date.now();
+    const stored = await db.sleepSession.findUniqueOrThrow({ where: { id } });
+    // Exact to the server's millisecond: no minute rounding, no phone clock.
+    expect(stored.startedAt.getTime()).toBeGreaterThanOrEqual(
+      before - 15 * 60_000,
+    );
+    expect(stored.startedAt.getTime()).toBeLessThanOrEqual(after - 15 * 60_000);
+  });
+
+  it("never starts before the previous sleep ended", async () => {
+    const family = await familyWithTwoParents();
+    const previousEnd = new Date(Date.now() - 4 * 60_000);
+    await insertSleepSession(family.babyId, {
+      createdById: family.luis,
+      startedAt: new Date(Date.now() - 90 * 60_000),
+      endedAt: previousEnd,
+    });
+    const id = randomUUID();
+
+    await startSleepSession({ id, babyId: family.babyId, minutesAgo: 15 });
+
+    const stored = await db.sleepSession.findUniqueOrThrow({ where: { id } });
+    expect(stored.startedAt).toEqual(previousEnd);
+  });
+
+  it("ignores another baby's sleeps when going back", async () => {
+    const family = await familyWithTwoParents();
+    const other = await createFamily();
+    await insertSleepSession(other.babyId, {
+      createdById: other.userId,
+      endedAt: new Date(Date.now() - 2 * 60_000),
+    });
+    const id = randomUUID();
+    const before = Date.now();
+
+    await startSleepSession({ id, babyId: family.babyId, minutesAgo: 10 });
+
+    const stored = await db.sleepSession.findUniqueOrThrow({ where: { id } });
+    expect(stored.startedAt.getTime()).toBeLessThanOrEqual(before - 9 * 60_000);
+  });
+
   it("starts a single session on a double tap", async () => {
     const family = await familyWithTwoParents();
     const input = { id: randomUUID(), babyId: family.babyId };

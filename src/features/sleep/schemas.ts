@@ -12,6 +12,9 @@ const HOUR_MS = 60 * 60 * 1000;
 /** A long night of a toddler fits; a forgotten timer typed by hand does not. */
 const MAX_SLEEP_MS = 16 * HOUR_MS;
 
+/** A timer started late covers a nap begun up to an hour ago. */
+export const MAX_SLEEP_START_MINUTES_AGO = 60;
+
 const checkSleepTimes = checkSessionTimes(
   MAX_SLEEP_MS,
   "Un sueño no puede durar más de 16 horas.",
@@ -24,12 +27,33 @@ const checkSleepTimes = checkSessionTimes(
  */
 export function sleepSessionSchemas(timeZone: string) {
   return {
-    /** Timer start. Without a time the server clock is the reference. */
-    startSleepSessionSchema: z.object({
-      id: recordId,
-      babyId: recordId,
-      startedAt: localDateTime(timeZone).optional(),
-    }),
+    /**
+     * Timer start, on the server clock: now, `minutesAgo` ("se durmió hace
+     * 10 min", counted by the server, so the phone's clock and the time
+     * zone never shift it) or an explicit `startedAt`.
+     */
+    startSleepSessionSchema: z
+      .object({
+        id: recordId,
+        babyId: recordId,
+        startedAt: localDateTime(timeZone).optional(),
+        minutesAgo: z
+          .number({ error: "Elige cuánto hace que se durmió." })
+          .int({ error: "Elige cuánto hace que se durmió." })
+          .min(0, { error: "Elige cuánto hace que se durmió." })
+          .max(MAX_SLEEP_START_MINUTES_AGO, {
+            error: `Como mucho, hace ${MAX_SLEEP_START_MINUTES_AGO} minutos.`,
+          })
+          .optional(),
+      })
+      .refine(
+        (start) =>
+          start.startedAt === undefined || start.minutesAgo === undefined,
+        {
+          error: "Indica la hora o los minutos, no las dos.",
+          path: ["minutesAgo"],
+        },
+      ),
     /** A finished sleep typed by hand. */
     createSleepSessionSchema: z
       .object({
