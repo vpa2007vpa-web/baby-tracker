@@ -101,7 +101,13 @@ Server Action ─▶ PostgreSQL (fuente de verdad)
 - **Estado de conexión:** una función pura `connectionStatus({ channelState, isOnline })` que da `online · reconnecting · offline`; la usan `RealtimeSync` y el indicador de D3.
 
 ### Tareas
-- [ ] **S0. Spike (desechable, en dev):** como `postgres` vía MCP, comprobar que se pueden crear la función `private.broadcast_household_change()` y la política sobre `realtime.messages` pese al bloqueo de 2026. Probar en el navegador que un canal privado recibe un cambio de su familia y no el de otra. Resultado: recomendación con evidencia. **Si falla, me detengo y te consulto el paso a A.**
+- [x] **S0. Spike (desechable, en dev):** **superado el 2026-10-09** (bloques `DO` terminados en `RAISE EXCEPTION`, así que nada persiste; verificado después).
+  - `postgres` **puede** crear la función en `private` y la política sobre `realtime.messages`, aunque la tabla es de `supabase_realtime_admin` y el esquema está bloqueado desde julio de 2026.
+  - Un *trigger* sobre una tabla temporal escribe 3 mensajes **privados** (`INSERT`, `UPDATE` y `DELETE`, este último acotado a la familia). Con la política, el miembro ve los 3, un extraño 0, y el propio miembro 0 en el *topic* de otra familia.
+  - Un `realtime.send` desde la BD llega a un cliente conectado (script en Node, canal público de prueba, unos 30 s después de suscribirse).
+  - **Hallazgo 1:** `realtime.send` convierte los errores de inserción en un `WARNING` y los silencia. Sin particiones en `realtime.messages`, el mensaje se pierde sin error. Las particiones diarias las crea Realtime cuando hay un cliente conectado (dev no tenía ninguna hasta conectar el script). En B1, la verificación vía MCP comprueba que existan; en prod, al desplegar (bloque D).
+  - **Hallazgo 2:** `realtime.broadcast_changes` envía la fila completa (`record` y `old_record`), es decir, datos de salud por el canal. El *trigger* usará `realtime.send` con solo `{table, op}`: es una señal, no un dato (decisión 015, §5).
+  - Sin probar (no hay sesión en el panel): la unión a un canal privado con el JWT de un usuario real. Queda para la QA de B5.
 - [ ] B1. `feat(db): broadcast household changes`:
   - ampliar `prisma/platform/supabase-bootstrap.sql` (función y política, idempotente) y `shadow-stubs.sql`;
   - migración `prisma migrate dev --create-only --name broadcast_household_changes` con los *triggers* de las 6 tablas;
