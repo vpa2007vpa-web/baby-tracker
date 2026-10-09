@@ -1,15 +1,17 @@
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
 
-import { RefreshOnFocus } from "@/components/layout/refresh-on-focus";
+import { RealtimeSyncLoader } from "@/features/sync/components/realtime-sync-loader";
 
-// Wraps every authenticated screen, (tabs) and (task). Static: each page
-// checks the session itself (CLAUDE.md §2.2). Phase 4's RealtimeSync lives
-// here, replacing RefreshOnFocus.
+// Wraps every authenticated screen, (tabs) and (task). The layout stays
+// static (decision 054): the session is read inside Suspense, by the sync
+// loader and by each page itself (CLAUDE.md §2.2).
 export default function AppLayout({ children }: LayoutProps<"/">): ReactNode {
   return (
     <>
       {children}
-      <RefreshOnFocus />
+      <Suspense fallback={null}>
+        <RealtimeSyncLoader />
+      </Suspense>
     </>
   );
 }
