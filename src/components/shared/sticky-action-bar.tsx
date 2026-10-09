@@ -1,7 +1,7 @@
 "use client";
 
 import { WifiOff } from "lucide-react";
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 
 import { useFocusRecovery } from "@/lib/use-focus-recovery";
 import { useOnlineStatus } from "@/lib/use-online-status";
@@ -17,7 +17,8 @@ type StickyActionBarProps = {
 /**
  * A module's one-tap actions, sticky above the bottom bar in the thumb zone
  * (CLAUDE.md §4.2). data-sticky-actions lifts the toasts above it
- * (globals.css). Offline it says why its buttons are disabled (§2.8), and
+ * (globals.css), by its measured height: a running timer card is taller
+ * than the buttons, and "Deshacer" must never cover the bar. Offline it says why its buttons are disabled (§2.8), and
  * focus survives a swap of its controls (decision 061).
  */
 export function StickyActionBar({
@@ -30,6 +31,25 @@ export function StickyActionBar({
     areControlsEnabled,
     swapKey,
   );
+  const { ref } = focusRecovery;
+
+  useEffect(() => {
+    const bar = ref.current;
+    if (!bar) return;
+    const root = document.documentElement;
+    const observer = new ResizeObserver(() => {
+      root.style.setProperty(
+        "--sticky-actions-height",
+        `${bar.offsetHeight}px`,
+      );
+    });
+    observer.observe(bar);
+    return () => {
+      observer.disconnect();
+      // Back to the stylesheet's default for the next screen.
+      root.style.removeProperty("--sticky-actions-height");
+    };
+  }, [ref]);
 
   return (
     <div
