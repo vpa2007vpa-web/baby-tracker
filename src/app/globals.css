@@ -105,6 +105,8 @@
   --toast-offset-bottom: calc(
     var(--bottom-nav-height) + env(safe-area-inset-bottom) + 0.75rem
   );
+  /* A sticky action bar above the bottom nav: py-3 around h-20 buttons. */
+  --sticky-actions-height: 6.5rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
@@ -209,4 +211,16 @@
   .animate-pulse {
     animation: none;
   }
+}
+
+/*
+ * Screens with a sticky action bar above the bottom nav (the one-tap diaper
+ * buttons) lift the toasts over it too, so "Deshacer" never covers the
+ * next tap.
+ */
+:root:has([data-sticky-actions]) {
+  --toast-offset-bottom: calc(
+    var(--bottom-nav-height) + var(--sticky-actions-height) +
+      env(safe-area-inset-bottom) + 0.75rem
+  );
 }
