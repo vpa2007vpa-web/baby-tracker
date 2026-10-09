@@ -86,6 +86,24 @@ export function summarizeFeedings(
   };
 }
 
+/**
+ * The sleep part of the day, also shown on the Sueño screen: sessions that
+ * started this day, and sleep time split by the stretch inside the day (a
+ * night from the day before adds its morning part; a running one lasts
+ * until `now`).
+ */
+export function summarizeSleep(
+  sessions: readonly SummarySleepSession[],
+  day: DayRange,
+  now: Date,
+): DailySummary["sleep"] {
+  return {
+    count: sessions.filter((session) => isWithin(session.startedAt, day))
+      .length,
+    totalMs: sum(sessions.map((session) => overlapMs(session, day, now))),
+  };
+}
+
 export function summarizeDay(
   input: DailySummaryInput,
   day: DayRange,
@@ -106,13 +124,6 @@ export function summarizeDay(
         (diaper) => diaper.type === "DIRTY" || diaper.type === "MIXED",
       ).length,
     },
-    sleep: {
-      count: input.sleepSessions.filter((session) =>
-        isWithin(session.startedAt, day),
-      ).length,
-      totalMs: sum(
-        input.sleepSessions.map((session) => overlapMs(session, day, now)),
-      ),
-    },
+    sleep: summarizeSleep(input.sleepSessions, day, now),
   };
 }

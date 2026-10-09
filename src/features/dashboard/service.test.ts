@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { summarizeDay, summarizeFeedings } from "@/features/dashboard/service";
+import {
+  summarizeDay,
+  summarizeFeedings,
+  summarizeSleep,
+} from "@/features/dashboard/service";
 import { getDayRange } from "@/lib/dates";
 
 const MADRID = "Europe/Madrid";
@@ -195,6 +199,22 @@ describe("summarizeFeedings", () => {
 
     expect(summarizeFeedings(feedings, OCT_1, LATER)).toEqual(
       summarizeDay({ ...EMPTY, feedings }, OCT_1, LATER).feedings,
+    );
+  });
+});
+
+describe("summarizeSleep", () => {
+  it("is the sleep part of the day summary, on its own", () => {
+    const sleepSessions = [
+      {
+        startedAt: new Date("2026-10-01T21:00:00Z"),
+        endedAt: new Date("2026-10-01T23:00:00Z"),
+      },
+      { startedAt: new Date("2026-10-02T10:00:00Z"), endedAt: null },
+    ];
+
+    expect(summarizeSleep(sleepSessions, OCT_2, LATER)).toEqual(
+      summarizeDay({ ...EMPTY, sleepSessions }, OCT_2, LATER).sleep,
     );
   });
 });
