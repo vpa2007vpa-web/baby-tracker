@@ -1,7 +1,7 @@
-import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { RecordHistoryItem } from "@/components/shared/record-history-item";
 import { buttonVariants } from "@/components/ui/button";
 import { DIAPER_TYPE_ICONS } from "@/features/diapers/components/diaper-type-icons";
 import { StoolSwatch } from "@/features/diapers/components/stool-swatch";
@@ -64,40 +64,26 @@ function DiaperHistoryItem({
   const needsDetails = diaper.type !== "WET" && stoolDetails.length === 0;
 
   return (
-    <div className="flex flex-col gap-2 py-3">
-      <Link
-        href={editHref}
-        className="flex min-h-12 items-center gap-3 rounded-xl outline-none focus-visible:ring-[3px] focus-visible:ring-ring"
-      >
-        <time
-          dateTime={diaper.occurredAt.toISOString()}
-          className="w-12 shrink-0 text-base font-semibold tabular-nums"
-        >
-          {time}
-        </time>
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-diapers-soft">
-          <Icon aria-hidden className="size-5 text-diapers" />
-        </span>
-        <span className="flex min-w-0 flex-1 flex-col">
-          <span className="font-medium">{DIAPER_TYPE_LABELS[diaper.type]}</span>
-          {stoolDetails.length > 0 && (
-            <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
+    <div className="flex flex-col pb-3">
+      <RecordHistoryItem
+        label={time}
+        dateTime={diaper.occurredAt.toISOString()}
+        icon={<Icon aria-hidden className="size-5 text-diapers" />}
+        iconSurfaceClassName="bg-diapers-soft"
+        title={DIAPER_TYPE_LABELS[diaper.type]}
+        details={
+          stoolDetails.length > 0 && (
+            <>
               {diaper.stoolColor && (
                 <StoolSwatch color={diaper.stoolColor} className="size-3.5" />
               )}
               {stoolDetails.join(" · ")}
-            </span>
-          )}
-          {author && (
-            <span className="text-sm text-muted-foreground">por {author}</span>
-          )}
-        </span>
-        <span className="sr-only">Editar</span>
-        <ChevronRight
-          aria-hidden
-          className="size-5 shrink-0 text-muted-foreground"
-        />
-      </Link>
+            </>
+          )
+        }
+        author={author}
+        href={editHref}
+      />
       {needsDetails && (
         <Link
           href={editHref}

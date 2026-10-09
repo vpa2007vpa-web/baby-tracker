@@ -1,7 +1,6 @@
-import { ChevronRight } from "lucide-react";
-import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { RecordHistoryItem } from "@/components/shared/record-history-item";
 import { FeedingTypeIcon } from "@/features/feeding/components/feeding-type-icon";
 import {
   BOTTLE_CONTENT_LABELS,
@@ -32,16 +31,31 @@ export function FeedingHistory({
     <ol className="flex flex-col divide-y divide-border">
       {feedings.map((feeding) => (
         <li key={feeding.id}>
-          <FeedingHistoryItem
-            feeding={feeding}
-            time={formatTime(feeding.startedAt, timeZone)}
-            isFromPreviousDay={feeding.startedAt < day.start}
+          <RecordHistoryItem
+            label={formatTime(feeding.startedAt, timeZone)}
+            dateTime={feeding.startedAt.toISOString()}
+            icon={
+              <FeedingTypeIcon
+                type={feeding.type}
+                className="size-5 text-feeding"
+              />
+            }
+            iconSurfaceClassName="bg-feeding-soft"
+            title={FEEDING_TYPE_LABELS[feeding.type]}
+            details={`${describeFeeding(feeding)}${feeding.startedAt < day.start ? " · desde el día anterior" : ""}`}
             author={authorLabel(feeding.createdById, viewerId, authorNames)}
+            // A running feeding is controlled from the bar, never edited
+            // (decision 051).
+            href={isRunning(feeding) ? null : `/feeding/${feeding.id}/edit`}
           />
         </li>
       ))}
     </ol>
   );
+}
+
+function isRunning(feeding: FeedingItem): boolean {
+  return feeding.type !== "BOTTLE" && feeding.endedAt === null;
 }
 
 function describeFeeding(feeding: FeedingItem): string {
@@ -54,62 +68,5 @@ function describeFeeding(feeding: FeedingItem): string {
   if (!feeding.endedAt) return "En curso";
   return formatDuration(
     feeding.endedAt.getTime() - feeding.startedAt.getTime(),
-  );
-}
-
-function FeedingHistoryItem({
-  feeding,
-  time,
-  isFromPreviousDay,
-  author,
-}: {
-  feeding: FeedingItem;
-  time: string;
-  isFromPreviousDay: boolean;
-  author: string | null;
-}): ReactNode {
-  // A running feeding is controlled from the bar, never edited (decision 051).
-  const isRunning = feeding.type !== "BOTTLE" && feeding.endedAt === null;
-  const content = (
-    <>
-      <time
-        dateTime={feeding.startedAt.toISOString()}
-        className="w-12 shrink-0 text-base font-semibold tabular-nums"
-      >
-        {time}
-      </time>
-      <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-feeding-soft">
-        <FeedingTypeIcon type={feeding.type} className="size-5 text-feeding" />
-      </span>
-      <span className="flex min-w-0 flex-1 flex-col">
-        <span className="font-medium">{FEEDING_TYPE_LABELS[feeding.type]}</span>
-        <span className="text-sm text-muted-foreground">
-          {describeFeeding(feeding)}
-          {isFromPreviousDay && " · desde el día anterior"}
-        </span>
-        {author && (
-          <span className="text-sm text-muted-foreground">por {author}</span>
-        )}
-      </span>
-    </>
-  );
-
-  if (isRunning) {
-    return (
-      <div className="flex min-h-12 items-center gap-3 py-3">{content}</div>
-    );
-  }
-  return (
-    <Link
-      href={`/feeding/${feeding.id}/edit`}
-      className="flex min-h-12 items-center gap-3 rounded-xl py-3 outline-none focus-visible:ring-[3px] focus-visible:ring-ring"
-    >
-      {content}
-      <span className="sr-only">Editar</span>
-      <ChevronRight
-        aria-hidden
-        className="size-5 shrink-0 text-muted-foreground"
-      />
-    </Link>
   );
 }
