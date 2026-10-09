@@ -61,7 +61,11 @@ export function NumberStepper({
 
   return (
     <Field data-invalid={isInvalid}>
-      <FieldLabel htmlFor={id}>{label}</FieldLabel>
+      <FieldLabel htmlFor={id}>
+        {label}
+        {/* The unit is drawn inside the field (aria-hidden): say it here. */}
+        <span className="sr-only"> ({unit})</span>
+      </FieldLabel>
       <div className="flex items-center gap-2">
         <Button
           type="button"
