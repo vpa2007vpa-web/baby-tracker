@@ -55,3 +55,17 @@ export function describeFeedingCounts(summary: {
   }
   return parts.join(" · ");
 }
+
+/** "Pecho izquierdo · 15 min", "Pecho derecho · en curso", "Biberón · 120 ml". */
+export function describeLastFeeding(feeding: {
+  type: FeedingType;
+  startedAt: Date;
+  endedAt: Date | null;
+  amountMl: number | null;
+}): string {
+  const label = FEEDING_TYPE_LABELS[feeding.type];
+  if (feeding.type === "BOTTLE")
+    return `${label} · ${feeding.amountMl ?? 0} ml`;
+  if (!feeding.endedAt) return `${label} · en curso`;
+  return `${label} · ${formatDuration(feeding.endedAt.getTime() - feeding.startedAt.getTime())}`;
+}

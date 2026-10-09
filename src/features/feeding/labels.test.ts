@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   BOTTLE_CONTENT_LABELS,
   describeFeedingCounts,
+  describeLastFeeding,
   FEEDING_TYPE_LABELS,
   FEEDING_TYPE_SHORT_LABELS,
   QUICK_BOTTLE_AMOUNTS_ML,
@@ -62,5 +63,42 @@ describe("describeFeedingCounts", () => {
         breastMs: 10 * MINUTE_MS,
       }),
     ).toBe("0 tomas · 0 de pecho (10 min)");
+  });
+});
+
+describe("describeLastFeeding", () => {
+  const start = new Date("2026-10-09T08:00:00Z");
+
+  it("gives a finished breast feeding's side and length", () => {
+    expect(
+      describeLastFeeding({
+        type: "BREAST_LEFT",
+        startedAt: start,
+        endedAt: new Date(start.getTime() + 15 * 60_000),
+        amountMl: null,
+      }),
+    ).toBe("Pecho izquierdo · 15 min");
+  });
+
+  it("says a breast feeding is still running", () => {
+    expect(
+      describeLastFeeding({
+        type: "BREAST_RIGHT",
+        startedAt: start,
+        endedAt: null,
+        amountMl: null,
+      }),
+    ).toBe("Pecho derecho · en curso");
+  });
+
+  it("gives a bottle's amount", () => {
+    expect(
+      describeLastFeeding({
+        type: "BOTTLE",
+        startedAt: start,
+        endedAt: null,
+        amountMl: 120,
+      }),
+    ).toBe("Biberón · 120 ml");
   });
 });
