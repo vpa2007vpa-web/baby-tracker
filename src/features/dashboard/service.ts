@@ -54,35 +54,49 @@ function sum(values: readonly number[]): number {
   return values.reduce((total, value) => total + value, 0);
 }
 
-export function summarizeDay(
-  input: DailySummaryInput,
+/**
+ * The feeding part of the day, also shown on the Tomas screen: feedings
+ * that started this day, millilitres of their bottles, and breast time
+ * split by the stretch inside the day (a running one lasts until `now`).
+ */
+export function summarizeFeedings(
+  feedings: readonly SummaryFeeding[],
   day: DayRange,
   now: Date,
-): DailySummary {
-  const feedingsOfDay = input.feedings.filter((feeding) =>
+): DailySummary["feedings"] {
+  const feedingsOfDay = feedings.filter((feeding) =>
     isWithin(feeding.startedAt, day),
   );
   const bottlesOfDay = feedingsOfDay.filter(
     (feeding) => feeding.type === "BOTTLE",
   );
   // Bottles are points in time: only breast feedings take time.
-  const breastFeedings = input.feedings.filter(
+  const breastFeedings = feedings.filter(
     (feeding) => feeding.type !== "BOTTLE",
   );
+
+  return {
+    count: feedingsOfDay.length,
+    bottleCount: bottlesOfDay.length,
+    bottleMl: sum(bottlesOfDay.map((bottle) => bottle.amountMl ?? 0)),
+    breastCount: feedingsOfDay.length - bottlesOfDay.length,
+    breastMs: sum(
+      breastFeedings.map((feeding) => overlapMs(feeding, day, now)),
+    ),
+  };
+}
+
+export function summarizeDay(
+  input: DailySummaryInput,
+  day: DayRange,
+  now: Date,
+): DailySummary {
   const diapersOfDay = input.diaperChanges.filter((diaper) =>
     isWithin(diaper.occurredAt, day),
   );
 
   return {
-    feedings: {
-      count: feedingsOfDay.length,
-      bottleCount: bottlesOfDay.length,
-      bottleMl: sum(bottlesOfDay.map((bottle) => bottle.amountMl ?? 0)),
-      breastCount: feedingsOfDay.length - bottlesOfDay.length,
-      breastMs: sum(
-        breastFeedings.map((feeding) => overlapMs(feeding, day, now)),
-      ),
-    },
+    feedings: summarizeFeedings(input.feedings, day, now),
     diapers: {
       total: diapersOfDay.length,
       wet: diapersOfDay.filter(

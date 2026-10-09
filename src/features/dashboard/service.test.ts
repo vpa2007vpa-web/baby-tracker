@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { summarizeDay } from "@/features/dashboard/service";
+import { summarizeDay, summarizeFeedings } from "@/features/dashboard/service";
 import { getDayRange } from "@/lib/dates";
 
 const MADRID = "Europe/Madrid";
@@ -179,5 +179,22 @@ describe("summarizeDay: empty day", () => {
       diapers: { total: 0, wet: 0, dirty: 0 },
       sleep: { count: 0, totalMs: 0 },
     });
+  });
+});
+
+describe("summarizeFeedings", () => {
+  it("is the feeding part of the day summary, on its own", () => {
+    const feedings = [
+      {
+        type: "BOTTLE" as const,
+        startedAt: new Date("2026-10-01T07:00:00Z"),
+        endedAt: null,
+        amountMl: 90,
+      },
+    ];
+
+    expect(summarizeFeedings(feedings, OCT_1, LATER)).toEqual(
+      summarizeDay({ ...EMPTY, feedings }, OCT_1, LATER).feedings,
+    );
   });
 });
