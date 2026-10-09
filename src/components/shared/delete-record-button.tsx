@@ -17,23 +17,35 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { deleteDiaperChange } from "@/features/diapers/actions";
+import type { ActionResult } from "@/lib/action-result";
 import { useOnlineStatus } from "@/lib/use-online-status";
 
-type DeleteDiaperButtonProps = {
+type DeleteRecordButtonProps = {
   id: string;
+  /** The module's delete Server Action, handed down by the page. */
+  deleteAction: (input: { id: string }) => Promise<ActionResult>;
   /** Where to go once it is gone: the history of its day. */
   returnHref: string;
+  /** "Borrar pañal": the trigger and the confirmation. */
+  actionLabel: string;
+  /** "¿Borrar este pañal?" */
+  title: string;
+  /** "Pañal borrado" */
+  successMessage: string;
 };
 
 /**
  * Deleting is permanent and shared (CLAUDE.md §2.6): an AlertDialog asks
  * first, the one dialog the MVP allows (§4.3).
  */
-export function DeleteDiaperButton({
+export function DeleteRecordButton({
   id,
+  deleteAction,
   returnHref,
-}: DeleteDiaperButtonProps): ReactNode {
+  actionLabel,
+  title,
+  successMessage,
+}: DeleteRecordButtonProps): ReactNode {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -41,10 +53,10 @@ export function DeleteDiaperButton({
 
   function remove(): void {
     startTransition(async () => {
-      const result = await deleteDiaperChange({ id });
+      const result = await deleteAction({ id });
       if (result.ok) {
         setIsOpen(false);
-        toast.success("Pañal borrado");
+        toast.success(successMessage);
         router.replace(returnHref);
         return;
       }
@@ -66,11 +78,11 @@ export function DeleteDiaperButton({
         }
       >
         <Trash aria-hidden className="size-5" />
-        Borrar pañal
+        {actionLabel}
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>¿Borrar este pañal?</AlertDialogTitle>
+          <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>
             Se borrará para los dos. No se puede deshacer.
           </AlertDialogDescription>
@@ -87,7 +99,7 @@ export function DeleteDiaperButton({
             onClick={remove}
             className="h-12 bg-destructive text-base text-background hover:bg-destructive/90"
           >
-            {isPending ? "Borrando…" : "Borrar pañal"}
+            {isPending ? "Borrando…" : actionLabel}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

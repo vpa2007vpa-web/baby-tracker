@@ -7,13 +7,16 @@ import { FormProvider, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import { FormFooter } from "@/components/shared/form-footer";
+import { offerUndo } from "@/components/shared/offer-undo";
 import { SubmitButton } from "@/components/shared/submit-button";
-import { createDiaperChange } from "@/features/diapers/actions";
+import {
+  createDiaperChange,
+  deleteDiaperChange,
+} from "@/features/diapers/actions";
 import {
   DIAPER_FIELD_NAMES,
   DiaperFields,
 } from "@/features/diapers/components/diaper-fields";
-import { offerUndo } from "@/features/diapers/components/offer-undo";
 import {
   diaperChangeSchemas,
   type CreateDiaperChangeInput,
@@ -51,7 +54,11 @@ export function NewDiaperForm({
     startTransition(async () => {
       const result = await createDiaperChange(values);
       if (result.ok) {
-        offerUndo("Pañal guardado", id);
+        offerUndo({
+          message: "Pañal guardado",
+          undo: () => deleteDiaperChange({ id }),
+          undoneMessage: "Pañal borrado",
+        });
         router.replace("/diapers");
         return;
       }

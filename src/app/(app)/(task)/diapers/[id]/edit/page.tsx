@@ -3,10 +3,11 @@ import { notFound } from "next/navigation";
 import { Suspense, type ReactNode } from "react";
 
 import { PageHeader } from "@/components/layout/page-header";
+import { DeleteRecordButton } from "@/components/shared/delete-record-button";
 import { FormSkeleton } from "@/components/shared/form-skeleton";
 import { Skeleton } from "@/components/ui/skeleton";
 import { requireBaby } from "@/features/auth/session";
-import { DeleteDiaperButton } from "@/features/diapers/components/delete-diaper-button";
+import { deleteDiaperChange } from "@/features/diapers/actions";
 import { EditDiaperForm } from "@/features/diapers/components/edit-diaper-form";
 import { getDiaperChange } from "@/features/diapers/queries";
 import { listHouseholdMembers } from "@/features/household/queries";
@@ -76,7 +77,14 @@ async function EditDiaperSection({
           notes: diaper.notes ?? "",
         }}
       >
-        <DeleteDiaperButton id={diaper.id} returnHref={returnHref} />
+        <DeleteRecordButton
+          id={diaper.id}
+          deleteAction={deleteDiaperChange}
+          returnHref={returnHref}
+          actionLabel="Borrar pañal"
+          title="¿Borrar este pañal?"
+          successMessage="Pañal borrado"
+        />
       </EditDiaperForm>
     </>
   );
