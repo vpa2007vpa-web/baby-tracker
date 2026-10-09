@@ -2,7 +2,7 @@ import { Square } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
-import { ElapsedTime } from "@/features/feeding/components/elapsed-time";
+import { ElapsedTime } from "@/components/shared/elapsed-time";
 import { FeedingTypeIcon } from "@/features/feeding/components/feeding-type-icon";
 import { FEEDING_TYPE_LABELS } from "@/features/feeding/labels";
 import type { BreastSide } from "@/features/feeding/service";
