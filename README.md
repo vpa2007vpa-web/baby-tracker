@@ -227,7 +227,7 @@ baby-tracker/
 - [ ] Ajustes de familia: ver miembros e invitación pendiente, y expulsar a un miembro (respuesta si un código se filtra antes de que se una la pareja).
 - [x] Layout base: `PageHeader`, `BottomNav` (Hoy · Tomas · Pañales · Sueño · Más), contenedor `max-w-md` y *safe areas* de iOS. *(Grupos `(tabs)` y `(task)`, pantalla Más y pantallas provisionales por módulo; decisiones 054 y 055.)*
 - [x] Componentes compartidos: `DateTimeField` con atajos ("Ahora", "−5 min", "−15 min", "−30 min"), `NumberStepper`, `ChoiceGrid` (opciones como botones grandes), `SubmitButton` con estado pendiente y `EmptyState`. *(Además `DayNav`, `TextField`, `FormFooter`, `FormSkeleton`, `LinkCard`, `DeleteRecordButton`, `offerUndo` y `useSingleFlight`; decisiones 057 y 060.)*
-- [ ] **Alimentación:** botones "Pecho izq." / "Pecho der." con cronómetro, sugerencia del siguiente pecho, biberón con cantidades rápidas (60 / 90 / 120 / 150 ml) e historial del día.
+- [x] **Alimentación:** botones "Pecho izq." / "Pecho der." con cronómetro, sugerencia del siguiente pecho, biberón con cantidades rápidas (60 / 90 / 120 / 150 ml) e historial del día. *(Cronómetro compartido con "Cambiar de pecho" y "Parar", biberón en dos toques precargado con el último, alta con otra hora, edición y borrado con autoría y `?day=`; decisiones 059–061.)*
 - [x] **Pañales:** registro en un toque (Mojado / Sucio / Mixto) y detalle opcional de color y textura con muestras visuales y texto. *(Historial por día con `?day=`, alta con otra hora, edición y borrado con autoría; decisiones 056–058.)*
 - [ ] **Sueño:** cronómetro grande iniciar / parar y entrada manual.
 - [ ] **Crecimiento:** formulario de medidas e historial.

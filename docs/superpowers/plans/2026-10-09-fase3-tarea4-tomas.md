@@ -34,7 +34,7 @@
 - [x] 10. `feat(feeding): delete from the edit screen`
 - [x] 11. `feat(app): refresh tab screens when they come back into view`
 - [x] 12. `docs`: decisiones 059–060 y este plan
-- [ ] Tras el QA con dos sesiones: revisiones de accesibilidad, código y sistema de diseño, y "Alimentación" marcada en el roadmap.
+- [x] Tras el QA con dos sesiones: revisiones de accesibilidad, código y sistema de diseño, y "Alimentación" marcada en el roadmap. *(Correcciones: foco tras cambiar los botones de la barra y unidad en el nombre de `NumberStepper`; decisión 061.)*
 
 ## Verificación
 
