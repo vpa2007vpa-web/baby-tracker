@@ -15,15 +15,17 @@ import { cn } from "@/lib/utils";
 
 const MINUTE_MS = 60_000;
 
+// The accessible name keeps the visible text ("−5 min") and adds the
+// spoken hint, so voice control users can say what they see (WCAG 2.5.3).
 const SHORTCUTS: ReadonlyArray<{
   minutesAgo: number;
   label: string;
-  spoken: string;
+  hint?: string;
 }> = [
-  { minutesAgo: 0, label: "Ahora", spoken: "Ahora" },
-  { minutesAgo: 5, label: "−5 min", spoken: "Hace 5 minutos" },
-  { minutesAgo: 15, label: "−15 min", spoken: "Hace 15 minutos" },
-  { minutesAgo: 30, label: "−30 min", spoken: "Hace 30 minutos" },
+  { minutesAgo: 0, label: "Ahora" },
+  { minutesAgo: 5, label: "−5 min", hint: "hace 5 minutos" },
+  { minutesAgo: 15, label: "−15 min", hint: "hace 15 minutos" },
+  { minutesAgo: 30, label: "−30 min", hint: "hace 30 minutos" },
 ];
 
 type DateTimeFieldProps = Omit<
@@ -81,7 +83,6 @@ export function DateTimeField({
             key={shortcut.minutesAgo}
             type="button"
             variant="outline"
-            aria-label={shortcut.spoken}
             onClick={() =>
               onChange(
                 formatDateTimeLocalValue(
@@ -93,6 +94,9 @@ export function DateTimeField({
             className="h-12 px-2 text-sm tabular-nums"
           >
             {shortcut.label}
+            {shortcut.hint && (
+              <span className="sr-only">, {shortcut.hint}</span>
+            )}
           </Button>
         ))}
       </div>
