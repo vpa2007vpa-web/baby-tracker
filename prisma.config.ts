@@ -19,9 +19,10 @@ export default defineConfig({
     // no-op stubs let the migrations that reference them replay there.
     initShadowDb: readFileSync("prisma/platform/shadow-stubs.sql", "utf8"),
   },
-  datasource: {
-    // CLI only (migrate, studio): session pooler / direct connection on :5432.
-    // The app uses DATABASE_URL (:6543) through PrismaPg in src/lib/db.ts.
-    url: env("DIRECT_URL"),
-  },
+  // CLI only (migrate, studio): session pooler / direct connection on :5432.
+  // The app uses DATABASE_URL (:6543) through PrismaPg in src/lib/db.ts.
+  // `prisma generate` (the deploy's postinstall) needs no database, so a
+  // build never gets this privileged URL; the commands that connect still
+  // fail loudly without it.
+  ...(process.env.DIRECT_URL && { datasource: { url: env("DIRECT_URL") } }),
 });
