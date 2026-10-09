@@ -19,6 +19,15 @@ export type DiaperFieldValues = Pick<
   "type" | "occurredAt" | "stoolColor" | "stoolConsistency" | "notes"
 >;
 
+/** For applyFieldErrors: the server's fieldErrors these fields can show. */
+export const DIAPER_FIELD_NAMES = [
+  "type",
+  "occurredAt",
+  "stoolColor",
+  "stoolConsistency",
+  "notes",
+] as const;
+
 const DIAPER_TYPES: readonly DiaperType[] = ["WET", "DIRTY", "MIXED"];
 
 /**

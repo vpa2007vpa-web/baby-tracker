@@ -9,21 +9,16 @@ import { toast } from "sonner";
 import { FormFooter } from "@/components/shared/form-footer";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { createDiaperChange } from "@/features/diapers/actions";
-import { DiaperFields } from "@/features/diapers/components/diaper-fields";
+import {
+  DIAPER_FIELD_NAMES,
+  DiaperFields,
+} from "@/features/diapers/components/diaper-fields";
 import { offerUndo } from "@/features/diapers/components/offer-undo";
 import {
   diaperChangeSchemas,
   type CreateDiaperChangeInput,
 } from "@/features/diapers/schemas";
 import { applyFieldErrors } from "@/lib/forms";
-
-const FIELDS = [
-  "type",
-  "occurredAt",
-  "stoolColor",
-  "stoolConsistency",
-  "notes",
-] as const;
 
 type NewDiaperFormProps = {
   babyId: string;
@@ -61,7 +56,7 @@ export function NewDiaperForm({
         return;
       }
       const { message, fieldErrors } = result.error;
-      if (!applyFieldErrors(form.setError, FIELDS, fieldErrors)) {
+      if (!applyFieldErrors(form.setError, DIAPER_FIELD_NAMES, fieldErrors)) {
         toast.error(message);
       }
     });

@@ -9,20 +9,15 @@ import { toast } from "sonner";
 import { FormFooter } from "@/components/shared/form-footer";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { updateDiaperChange } from "@/features/diapers/actions";
-import { DiaperFields } from "@/features/diapers/components/diaper-fields";
+import {
+  DIAPER_FIELD_NAMES,
+  DiaperFields,
+} from "@/features/diapers/components/diaper-fields";
 import {
   diaperChangeSchemas,
   type UpdateDiaperChangeInput,
 } from "@/features/diapers/schemas";
 import { applyFieldErrors } from "@/lib/forms";
-
-const FIELDS = [
-  "type",
-  "occurredAt",
-  "stoolColor",
-  "stoolConsistency",
-  "notes",
-] as const;
 
 type EditDiaperFormProps = {
   timeZone: string;
@@ -59,7 +54,7 @@ export function EditDiaperForm({
         return;
       }
       const { message, fieldErrors } = result.error;
-      if (!applyFieldErrors(form.setError, FIELDS, fieldErrors)) {
+      if (!applyFieldErrors(form.setError, DIAPER_FIELD_NAMES, fieldErrors)) {
         toast.error(message);
       }
     });
