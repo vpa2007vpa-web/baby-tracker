@@ -108,22 +108,22 @@ Server Action ─▶ PostgreSQL (fuente de verdad)
   - **Hallazgo 1:** `realtime.send` convierte los errores de inserción en un `WARNING` y los silencia. Sin particiones en `realtime.messages`, el mensaje se pierde sin error. Las particiones diarias las crea Realtime cuando hay un cliente conectado (dev no tenía ninguna hasta conectar el script). En B1, la verificación vía MCP comprueba que existan; en prod, al desplegar (bloque D).
   - **Hallazgo 2:** `realtime.broadcast_changes` envía la fila completa (`record` y `old_record`), es decir, datos de salud por el canal. El *trigger* usará `realtime.send` con solo `{table, op}`: es una señal, no un dato (decisión 015, §5).
   - Sin probar (no hay sesión en el panel): la unión a un canal privado con el JWT de un usuario real. Queda para la QA de B5.
-- [ ] B1. `feat(db): broadcast household changes`:
+- [x] B1. `feat(db): broadcast household changes`:
   - ampliar `prisma/platform/supabase-bootstrap.sql` (función y política, idempotente) y `shadow-stubs.sql`;
   - migración `prisma migrate dev --create-only --name broadcast_household_changes` con los *triggers* de las 6 tablas;
   - verificación vía MCP: `_prisma_migrations`, *triggers*, `pg_policies` sobre `realtime.messages` y *advisors* (regla 0.2);
   - test de integración: los *triggers* no rompen ninguna escritura contra el *stub*.
   - **Pide tu confirmación antes de aplicar** (cambio de esquema y de la excepción de la decisión 027).
-- [ ] B2. `feat(sync): add the connection status and debounced refresh`: funciones puras con test (estados, temporizadores falsos y un aviso doble en 300 ms → un solo refresco).
-- [ ] B3. `feat(sync): add RealtimeSync`: cliente con canal privado, reconexión, limpieza en el desmontaje y `router.refresh()`; cargador en `(app)/layout.tsx`; se elimina `RefreshOnFocus`.
-- [ ] B4. `feat(sync): add the connection indicator`: la franja de D3 en `(tabs)` y `(task)`, accesible y con movimiento reducido.
+- [x] B2. `feat(sync): add the connection status and debounced refresh`: funciones puras con test (estados, temporizadores falsos y un aviso doble en 300 ms → un solo refresco).
+- [x] B3. `feat(sync): add RealtimeSync`: cliente con canal privado, reconexión, limpieza en el desmontaje y `router.refresh()`; cargador en `(app)/layout.tsx`; se elimina `RefreshOnFocus`.
+- [x] B4. `feat(sync): add the connection indicator`: la franja de D3 en `(tabs)` y `(task)`, accesible y con movimiento reducido.
 - [ ] B5. `test(sync)`: QA con dos sesiones (dos usuarios de la familia de dev):
   - un registro en A aparece en B en menos de 2 s (cronometrado);
   - un borrado en A desaparece en B;
   - dos inicios de siesta simultáneos dan un registro y un aviso;
   - modo avión → «Sin conexión» → vuelve sola;
   - una pestaña de **otra** familia no recibe nada (comprobado en la pestaña de red).
-- [ ] B6. `docs`: decisión de Realtime (sustituye la parte de transporte de la 015 y cumple la «evolución prevista» de la 2.8) y casillas de «Sincronización en la nube».
+- [x] B6. `docs`: decisiones 066 y 067, y reglas 0.2 y 2.8 actualizadas. *(Las casillas de «Sincronización en la nube» del README, tras la QA de B5.)* Antes: decisión de Realtime (sustituye la parte de transporte de la 015 y cumple la «evolución prevista» de la 2.8) y casillas de «Sincronización en la nube».
 
 ## 6. Bloques C y D — esbozo (plan propio más adelante)
 
