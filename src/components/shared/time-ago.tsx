@@ -5,8 +5,8 @@ import type { ReactNode } from "react";
 import { formatTimeAgo } from "@/lib/dates";
 import { useServerClock } from "@/lib/use-server-clock";
 
-/** Minutes are the finest unit shown: repainting more often is waste. */
-const TICK_MS = 30_000;
+/** Minutes are the finest unit shown: each change shows within 10 s. */
+const TICK_MS = 10_000;
 
 type TimeAgoProps = {
   /** ISO instant from the database. */
