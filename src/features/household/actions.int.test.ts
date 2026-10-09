@@ -6,10 +6,18 @@ import {
   createHousehold,
   createHouseholdInvite,
   joinHousehold,
+  removeHouseholdMember,
+  revokeHouseholdInvite,
 } from "@/features/household/actions";
 import { db } from "@/lib/db";
 import { parseDateOnly } from "@/lib/dates";
-import { createFamily, createInvite, createMember } from "@/test/factories";
+import { requireMember } from "@/test/session-double";
+import {
+  createFamily,
+  createHealthRecord,
+  createInvite,
+  createMember,
+} from "@/test/factories";
 import { session } from "@/test/session-double";
 
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
@@ -277,5 +285,190 @@ describe("joinHousehold", () => {
         where: { householdId: family.householdId },
       }),
     ).toMatchObject({ usedAt: null });
+  });
+});
+
+/** OWNER "Ana" (signed in) and MEMBER "Luis" of one household. */
+async function familyWithPartner(): Promise<{
+  householdId: string;
+  babyId: string;
+  owner: string;
+  partner: string;
+}> {
+  const family = await createFamily();
+  const { userId: partner } = await createMember(family.householdId, {
+    role: "MEMBER",
+    displayName: "Luis",
+  });
+  session.userId = family.userId;
+  return {
+    householdId: family.householdId,
+    babyId: family.babyId,
+    owner: family.userId,
+    partner,
+  };
+}
+
+function pendingInvites(householdId: string): Promise<number> {
+  return db.householdInvite.count({ where: { householdId, usedAt: null } });
+}
+
+describe("removeHouseholdMember", () => {
+  it("removes the MEMBER, who loses access; their records stay", async () => {
+    const family = await familyWithPartner();
+    const record = await createHealthRecord(family.babyId, {
+      createdById: family.partner,
+    });
+
+    await expect(
+      removeHouseholdMember({ userId: family.partner }),
+    ).resolves.toEqual({ ok: true, data: undefined });
+
+    session.userId = family.partner;
+    await expect(requireMember()).rejects.toThrow("REDIRECT:/join");
+    await expect(
+      db.healthRecord.count({ where: { id: record.id } }),
+    ).resolves.toBe(1);
+  });
+
+  it("revokes the pending invites with it", async () => {
+    const family = await familyWithPartner();
+    await createInvite(family.householdId, {
+      code: "ABCDEFGHJK",
+      createdById: family.owner,
+    });
+
+    await removeHouseholdMember({ userId: family.partner });
+
+    await expect(pendingInvites(family.householdId)).resolves.toBe(0);
+    session.userId = randomUUID();
+    const joined = await joinHousehold({
+      displayName: "Intrusa",
+      code: "ABCDE-FGHJK",
+    });
+    expect(joined).toMatchObject({ ok: false, error: { code: "VALIDATION" } });
+  });
+
+  it("lets only the OWNER remove someone", async () => {
+    const family = await familyWithPartner();
+    session.userId = family.partner;
+
+    const result = await removeHouseholdMember({ userId: family.owner });
+
+    expect(result).toMatchObject({ ok: false, error: { code: "CONFLICT" } });
+    await expect(
+      db.householdMember.count({ where: { householdId: family.householdId } }),
+    ).resolves.toBe(2);
+  });
+
+  it("never removes the OWNER themself", async () => {
+    const family = await familyWithPartner();
+
+    const result = await removeHouseholdMember({ userId: family.owner });
+
+    expect(result).toMatchObject({ ok: false, error: { code: "VALIDATION" } });
+    session.userId = family.owner;
+    await expect(requireMember()).resolves.toMatchObject({ role: "OWNER" });
+  });
+
+  it("never touches another household's member", async () => {
+    const family = await familyWithPartner();
+    const other = await createFamily();
+    const { userId: stranger } = await createMember(other.householdId, {
+      role: "MEMBER",
+    });
+
+    // The same answer as an already removed member: nothing to reveal.
+    await expect(removeHouseholdMember({ userId: stranger })).resolves.toEqual({
+      ok: true,
+      data: undefined,
+    });
+    await expect(
+      db.householdMember.count({ where: { userId: stranger } }),
+    ).resolves.toBe(1);
+  });
+
+  it("is idempotent, even on a simultaneous double tap", async () => {
+    const family = await familyWithPartner();
+    const input = { userId: family.partner };
+
+    const results = await Promise.all([
+      removeHouseholdMember(input),
+      removeHouseholdMember(input),
+    ]);
+
+    expect(results).toEqual([
+      { ok: true, data: undefined },
+      { ok: true, data: undefined },
+    ]);
+    await expect(
+      db.householdMember.count({ where: { householdId: family.householdId } }),
+    ).resolves.toBe(1);
+  });
+
+  it("validates the input", async () => {
+    await familyWithPartner();
+    await expect(
+      removeHouseholdMember({ userId: "not-a-uuid" }),
+    ).resolves.toMatchObject({ ok: false, error: { code: "VALIDATION" } });
+  });
+});
+
+describe("revokeHouseholdInvite", () => {
+  it("makes the pending code useless and keeps used ones", async () => {
+    const { family, code } = await familyWithInvite();
+    await createInvite(family.householdId, {
+      code: "ZZZZZZZZZZ",
+      createdById: family.userId,
+      usedAt: new Date(),
+    });
+
+    await expect(revokeHouseholdInvite()).resolves.toEqual({
+      ok: true,
+      data: undefined,
+    });
+
+    await expect(pendingInvites(family.householdId)).resolves.toBe(0);
+    await expect(
+      db.householdInvite.count({ where: { householdId: family.householdId } }),
+    ).resolves.toBe(1);
+    session.userId = randomUUID();
+    await expect(
+      joinHousehold({ displayName: "Pablo", code }),
+    ).resolves.toMatchObject({ ok: false, error: { code: "VALIDATION" } });
+  });
+
+  it("is a no-op without a pending code", async () => {
+    const family = await createFamily();
+    session.userId = family.userId;
+    await expect(revokeHouseholdInvite()).resolves.toEqual({
+      ok: true,
+      data: undefined,
+    });
+  });
+
+  it("leaves a coherent household when racing a redemption", async () => {
+    const { family, code } = await familyWithInvite();
+    const joiner = randomUUID();
+
+    const [joined] = await Promise.all([
+      outcomeOf(
+        (async () => {
+          session.userId = joiner;
+          return joinHousehold({ displayName: "Pablo", code });
+        })(),
+      ),
+      (async () => {
+        session.userId = family.userId;
+        return revokeHouseholdInvite();
+      })(),
+    ]);
+
+    const members = await db.householdMember.count({
+      where: { householdId: family.householdId },
+    });
+    // Either the code was spent first (two members) or revoked (one).
+    expect(members).toBe(joined === "REDIRECT:/" ? 2 : 1);
+    await expect(pendingInvites(family.householdId)).resolves.toBe(0);
   });
 });

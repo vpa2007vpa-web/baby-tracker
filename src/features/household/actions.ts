@@ -9,6 +9,7 @@ import { formatInviteCode } from "@/features/household/invite-code";
 import {
   createHouseholdSchema,
   joinHouseholdSchema,
+  removeHouseholdMemberSchema,
 } from "@/features/household/schemas";
 import {
   generateInviteCode,
@@ -131,9 +132,7 @@ export async function createHouseholdInvite(): Promise<
     });
 
     if (!invite) return actionError("CONFLICT", FULL_HOUSEHOLD_MESSAGE);
-    // Literal paths: /settings has no layout.tsx for a "layout" revalidation.
-    revalidatePath("/settings");
-    revalidatePath("/settings/invite");
+    revalidateSettings();
     return ok(invite);
   } catch (error) {
     return handleActionError("createHouseholdInvite", error);
@@ -208,4 +207,80 @@ export async function joinHousehold(input: unknown): Promise<ActionResult> {
 
   revalidatePath("/");
   redirect("/");
+}
+
+function revalidateSettings(): void {
+  // Literal paths: /settings has no layout.tsx for a "layout" revalidation.
+  revalidatePath("/settings");
+  revalidatePath("/settings/invite");
+}
+
+/**
+ * Settings: the OWNER removes the other member, typically someone who got
+ * hold of a leaked code (README, phase 3). Under the household lock that
+ * also serializes redemptions (ADR-043), the member is deleted and every
+ * pending invite revoked, so the leaked code dies with them. Their records
+ * stay, without a name (authorLabel finds none). Idempotent: an id that is
+ * not a member here, removed already or never one, gets the same `ok`, so
+ * nothing about other households leaks. Their next request lands on /join.
+ */
+export async function removeHouseholdMember(
+  input: unknown,
+): Promise<ActionResult> {
+  const member = await requireMember();
+  const parsed = removeHouseholdMemberSchema.safeParse(input);
+  if (!parsed.success) return validationError(parsed.error);
+  if (member.role !== "OWNER") {
+    return actionError(
+      "CONFLICT",
+      "Solo quien creó la familia puede expulsar a alguien.",
+    );
+  }
+  if (parsed.data.userId === member.userId) {
+    return actionError("VALIDATION", "No puedes expulsarte a ti.");
+  }
+
+  try {
+    await db.$transaction(async (tx) => {
+      await lockHousehold(tx, member.householdId);
+      // role MEMBER: the OWNER is never removed, whatever the id.
+      await tx.householdMember.deleteMany({
+        where: {
+          householdId: member.householdId,
+          userId: parsed.data.userId,
+          role: "MEMBER",
+        },
+      });
+      await tx.householdInvite.deleteMany({
+        where: { householdId: member.householdId, usedAt: null },
+      });
+    });
+    revalidateSettings();
+    return ok();
+  } catch (error) {
+    return handleActionError("removeHouseholdMember", error);
+  }
+}
+
+/**
+ * Settings: "Anular código". Revokes the household's pending invites, for a
+ * code shared by mistake. Any member may, as any member may create one.
+ * Under the household lock a racing redemption either spent the code first
+ * or finds it gone. Used invites stay as history.
+ */
+export async function revokeHouseholdInvite(): Promise<ActionResult> {
+  const member = await requireMember();
+
+  try {
+    await db.$transaction(async (tx) => {
+      await lockHousehold(tx, member.householdId);
+      await tx.householdInvite.deleteMany({
+        where: { householdId: member.householdId, usedAt: null },
+      });
+    });
+    revalidateSettings();
+    return ok();
+  } catch (error) {
+    return handleActionError("revokeHouseholdInvite", error);
+  }
 }

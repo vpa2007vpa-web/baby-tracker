@@ -58,3 +58,8 @@ export const joinHouseholdSchema = z.object({
 });
 
 export type JoinHouseholdInput = z.infer<typeof joinHouseholdSchema>;
+
+/** Settings: the OWNER removes the other parent (or a stranger). */
+export const removeHouseholdMemberSchema = z.object({
+  userId: z.uuid({ error: "Ese miembro no existe." }),
+});
