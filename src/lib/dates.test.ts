@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  addDaysToDate,
   formatDateInputValue,
+  formatDateTimeLocalValue,
+  formatDayLabel,
   formatDuration,
   formatRelativeDayTime,
   formatTime,
@@ -9,6 +12,7 @@ import {
   getDayRange,
   parseDateOnly,
   parseDateTimeLocal,
+  resolveDay,
 } from "@/lib/dates";
 
 const MADRID = "Europe/Madrid";
@@ -166,5 +170,78 @@ describe("formatRelativeDayTime", () => {
     expect(
       formatRelativeDayTime(new Date("2026-10-12T07:00:00Z"), NOW, MADRID),
     ).toBe("el 12/10 a las 09:00");
+  });
+});
+
+describe("formatDateTimeLocalValue", () => {
+  it('writes the household wall-clock time for <input type="datetime-local">', () => {
+    // 23:30 UTC on Oct 8 is 01:30 on Oct 9 in Madrid.
+    expect(
+      formatDateTimeLocalValue(new Date("2026-10-08T23:30:00Z"), MADRID),
+    ).toBe("2026-10-09T01:30");
+  });
+
+  it("round-trips with parseDateTimeLocal", () => {
+    const instant = new Date("2026-10-08T12:34:00Z");
+    expect(
+      parseDateTimeLocal(formatDateTimeLocalValue(instant, MADRID), MADRID),
+    ).toEqual(instant);
+  });
+});
+
+describe("addDaysToDate", () => {
+  it("moves across months and years", () => {
+    expect(addDaysToDate("2026-10-01", -1)).toBe("2026-09-30");
+    expect(addDaysToDate("2026-12-31", 1)).toBe("2027-01-01");
+  });
+
+  it("is plain calendar arithmetic, unaffected by DST", () => {
+    expect(addDaysToDate("2026-10-25", 1)).toBe("2026-10-26");
+  });
+});
+
+describe("resolveDay", () => {
+  // 01:30 on Oct 9 in Madrid, still Oct 8 in UTC.
+  const NOW = new Date("2026-10-08T23:30:00Z");
+
+  it("is today in the household zone without a parameter", () => {
+    expect(resolveDay(undefined, NOW, MADRID)).toEqual({
+      date: "2026-10-09",
+      isToday: true,
+      range: getDayRange(NOW, MADRID),
+    });
+  });
+
+  it("reads a past day", () => {
+    const day = resolveDay("2026-10-01", NOW, MADRID);
+    expect(day.date).toBe("2026-10-01");
+    expect(day.isToday).toBe(false);
+    expect(day.range.start.toISOString()).toBe("2026-09-30T22:00:00.000Z");
+  });
+
+  it.each(["2026-10-10", "2026-02-31", "ayer", ""])(
+    "falls back to today for %j (future, impossible or malformed)",
+    (param) => {
+      expect(resolveDay(param, NOW, MADRID).date).toBe("2026-10-09");
+    },
+  );
+});
+
+describe("formatDayLabel", () => {
+  const NOW = new Date("2026-10-08T23:30:00Z"); // Oct 9 in Madrid
+
+  it("says Hoy and Ayer in the household zone", () => {
+    expect(
+      formatDayLabel(resolveDay("2026-10-09", NOW, MADRID), NOW, MADRID),
+    ).toBe("Hoy");
+    expect(
+      formatDayLabel(resolveDay("2026-10-08", NOW, MADRID), NOW, MADRID),
+    ).toBe("Ayer");
+  });
+
+  it("names older days briefly, in Spanish", () => {
+    expect(
+      formatDayLabel(resolveDay("2026-10-01", NOW, MADRID), NOW, MADRID),
+    ).toBe("jue 1 oct");
   });
 });

@@ -1,5 +1,6 @@
 import { TZDate } from "@date-fns/tz";
 import { addDays, format, startOfDay } from "date-fns";
+import { es } from "date-fns/locale";
 
 // All date logic takes the household time zone explicitly (env.APP_TIMEZONE on
 // the server): never the implicit zone of the machine (CLAUDE.md §2.5).
@@ -75,6 +76,61 @@ export function formatTime(instant: Date, timeZone: string): string {
 /** `<input type="date">` value ("2026-10-08") of `instant` in `timeZone`. */
 export function formatDateInputValue(instant: Date, timeZone: string): string {
   return format(new TZDate(instant, timeZone), "yyyy-MM-dd");
+}
+
+/** `<input type="datetime-local">` value ("2026-10-08T14:30") in `timeZone`. */
+export function formatDateTimeLocalValue(
+  instant: Date,
+  timeZone: string,
+): string {
+  return format(new TZDate(instant, timeZone), "yyyy-MM-dd'T'HH:mm");
+}
+
+/** "2026-10-01" plus `days`, as plain calendar arithmetic (no time zone). */
+export function addDaysToDate(date: string, days: number): string {
+  const [year = 0, month = 1, day = 1] = date.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, day + days))
+    .toISOString()
+    .slice(0, 10);
+}
+
+/** A household day picked with the `?day=` filter (CLAUDE.md §2.4). */
+export type CalendarDay = { date: string; isToday: boolean; range: DayRange };
+
+/**
+ * The day of a `?day=2026-10-01` parameter. A missing, malformed, impossible
+ * or future value means today: a URL can never show an empty future day.
+ */
+export function resolveDay(
+  param: string | undefined,
+  now: Date,
+  timeZone: string,
+): CalendarDay {
+  const today = formatDateInputValue(now, timeZone);
+  const start = param ? parseDateOnly(param, timeZone) : null;
+  // yyyy-MM-dd strings sort chronologically.
+  if (!param || !start || param > today) {
+    return { date: today, isToday: true, range: getDayRange(now, timeZone) };
+  }
+  return {
+    date: param,
+    isToday: param === today,
+    range: getDayRange(start, timeZone),
+  };
+}
+
+/** "Hoy", "Ayer" or "jue 1 oct", for the day navigation. */
+export function formatDayLabel(
+  day: CalendarDay,
+  now: Date,
+  timeZone: string,
+): string {
+  const today = formatDateInputValue(now, timeZone);
+  if (day.date === today) return "Hoy";
+  if (day.date === addDaysToDate(today, -1)) return "Ayer";
+  return format(new TZDate(day.range.start, timeZone), "EEE d MMM", {
+    locale: es,
+  });
 }
 
 /** "hoy a las 18:00", "mañana a las 12:30", "el 12/10 a las 09:00". */
