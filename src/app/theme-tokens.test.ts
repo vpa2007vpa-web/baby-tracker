@@ -3,6 +3,8 @@ import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
+import { StoolColor } from "@/generated/prisma/enums";
+
 const MODULES = ["feeding", "diapers", "sleep", "growth", "health"] as const;
 const WCAG_AA_TEXT = 4.5;
 const WCAG_AA_NON_TEXT = 3;
@@ -123,4 +125,20 @@ describe.each([
       WCAG_AA_TEXT,
     );
   });
+});
+
+// A StoolColor without its token compiles (StoolSwatch maps it to a class),
+// but Tailwind then never generates bg-stool-*: the swatch would silently
+// render invisible. Every color needs its value and its theme mapping.
+describe("stool swatch tokens", () => {
+  const root = readBlock(":root");
+  const theme = readBlock("@theme inline");
+
+  it.each(Object.values(StoolColor).map((color) => color.toLowerCase()))(
+    "defines --stool-%s and maps it into the theme",
+    (color) => {
+      expect(() => readOklch(root, `stool-${color}`)).not.toThrow();
+      expect(theme).toContain(`--color-stool-${color}: var(--stool-${color});`);
+    },
+  );
 });
