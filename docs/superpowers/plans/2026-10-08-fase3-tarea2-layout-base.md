@@ -34,7 +34,7 @@
 - [x] 5. `feat(app): add the Más screen and placeholder module tabs`.
 - [x] 6. `test(theme): guard the contrast of the bottom bar's neutral states` (el 3:1 de iconos de módulo ya existía desde la Fase 1).
 - [x] 7. `docs`: decisión 054, estructura de carpetas y este plan.
-- [ ] Tras el QA visual: marcar "Layout base" en el roadmap.
+- [x] Tras el QA visual: avisos por encima de la barra, revisión de accesibilidad (foco 3:1, `aria-current` de sección, movimiento reducido) y de código, y "Layout base" marcado en el roadmap.
 
 ## Verificación
 

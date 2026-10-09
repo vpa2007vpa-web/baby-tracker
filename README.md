@@ -225,7 +225,7 @@ baby-tracker/
 
 - [x] Pantallas de acceso: login con email + código, crear familia y bebé, e invitar o unirse con código (el código se muestra una sola vez: botones "Compartir" y "Generar otro"). *(`/join`, `/join/create`, `/join/code` y `/settings/invite`; decisiones 046–048.)*
 - [ ] Ajustes de familia: ver miembros e invitación pendiente, y expulsar a un miembro (respuesta si un código se filtra antes de que se una la pareja).
-- [ ] Layout base: `PageHeader`, `BottomNav` (Hoy · Tomas · Pañales · Sueño · Más), contenedor `max-w-md` y *safe areas* de iOS. *(`PageHeader` ya existe.)*
+- [x] Layout base: `PageHeader`, `BottomNav` (Hoy · Tomas · Pañales · Sueño · Más), contenedor `max-w-md` y *safe areas* de iOS. *(Grupos `(tabs)` y `(task)`, pantalla Más y pantallas provisionales por módulo; decisiones 054 y 055.)*
 - [ ] Componentes compartidos: `DateTimeField` con atajos ("Ahora", "−5 min", "−15 min", "−30 min"), `NumberStepper`, `ChoiceGrid` (opciones como botones grandes), `SubmitButton` con estado pendiente y `EmptyState`. *(Ya existen `SubmitButton`, `EmptyState`, `TextField`, `FormFooter`, `FormSkeleton` y `LinkCard`.)*
 - [ ] **Alimentación:** botones "Pecho izq." / "Pecho der." con cronómetro, sugerencia del siguiente pecho, biberón con cantidades rápidas (60 / 90 / 120 / 150 ml) e historial del día.
 - [ ] **Pañales:** registro en un toque (Mojado / Sucio / Mixto) y detalle opcional de color y textura con muestras visuales y texto.
