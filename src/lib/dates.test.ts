@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import {
   addDaysToDate,
+  elapsedMs,
+  formatElapsed,
   formatDateInputValue,
   formatDateTimeLocalValue,
   formatDayLabel,
@@ -243,5 +245,31 @@ describe("formatDayLabel", () => {
     expect(
       formatDayLabel(resolveDay("2026-10-01", NOW, MADRID), NOW, MADRID),
     ).toBe("jue 1 oct");
+  });
+});
+
+describe("formatElapsed", () => {
+  it("shows a running timer as m:ss, then h:mm:ss", () => {
+    expect(formatElapsed(5_000)).toBe("0:05");
+    expect(formatElapsed(12 * MINUTE + 34_000)).toBe("12:34");
+    expect(formatElapsed(HOUR + 2 * MINUTE + 3_000)).toBe("1:02:03");
+  });
+
+  it("never shows a negative time", () => {
+    expect(formatElapsed(-3_000)).toBe("0:00");
+  });
+});
+
+describe("elapsedMs", () => {
+  const STARTED_AT = Date.parse("2026-10-09T10:00:00Z");
+
+  it("measures from the stored start on the server's clock", () => {
+    // This phone runs 2 minutes behind the server.
+    const phoneNow = Date.parse("2026-10-09T10:08:00Z");
+    expect(elapsedMs(STARTED_AT, phoneNow, 2 * MINUTE)).toBe(10 * MINUTE);
+  });
+
+  it("is zero, not negative, when the clocks disagree the other way", () => {
+    expect(elapsedMs(STARTED_AT, STARTED_AT - MINUTE, 0)).toBe(0);
   });
 });

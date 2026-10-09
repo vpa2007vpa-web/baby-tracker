@@ -172,3 +172,26 @@ export function formatTimeAgo(instant: Date, now: Date): string {
   const days = Math.floor(elapsedMs / DAY_MS);
   return days === 1 ? "hace 1 día" : `hace ${days} días`;
 }
+
+/**
+ * Milliseconds since `startedAtMs` on the server's clock: `skewMs` is how far
+ * this device's clock runs behind the server, so both parents' phones show
+ * the same timer. Never negative.
+ */
+export function elapsedMs(
+  startedAtMs: number,
+  nowMs: number,
+  skewMs: number,
+): number {
+  return Math.max(0, nowMs + skewMs - startedAtMs);
+}
+
+/** A running timer: "0:05", "12:34", "1:02:03". */
+export function formatElapsed(durationMs: number): string {
+  const totalSeconds = Math.max(0, Math.floor(durationMs / 1000));
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = String(totalSeconds % 60).padStart(2, "0");
+  if (hours === 0) return `${minutes}:${seconds}`;
+  return `${hours}:${String(minutes).padStart(2, "0")}:${seconds}`;
+}
