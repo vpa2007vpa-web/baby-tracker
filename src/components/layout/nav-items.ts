@@ -85,13 +85,11 @@ export function getActiveNavItem(segment: string | null): NavItemId | null {
   return TAB_BY_SEGMENT[segment] ?? null;
 }
 
-const TAB_ROOT_SEGMENTS: ReadonlySet<string | null> = new Set([
-  null,
-  "feeding",
-  "diapers",
-  "sleep",
-  "more",
-]);
+// Derived from NAV_ITEMS, so a new tab cannot be forgotten here: "/" is the
+// home page (no segment), "/feeding" the "feeding" segment.
+const TAB_ROOT_SEGMENTS: ReadonlySet<string | null> = new Set(
+  NAV_ITEMS.map(({ href }) => (href === "/" ? null : href.slice(1))),
+);
 
 /**
  * Whether the segment is the page a tab links to. On a screen reached from
