@@ -8,6 +8,7 @@ import { formatDuration } from "@/lib/dates";
 export type SummaryCardText = {
   /** The big figure, with tabular digits. */
   value: string;
+  /** Left empty when the value carries its own unit ("5,25 kg"). */
   unit: string;
   details: string[];
 };

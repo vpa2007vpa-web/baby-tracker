@@ -38,7 +38,7 @@ export function LastFeedingCard({
         <TimeAgo
           instant={startedAt}
           serverNow={serverNow}
-          className="text-2xl font-semibold first-letter:uppercase"
+          className="block text-2xl font-semibold first-letter:uppercase"
         />
         <span>{description}</span>
         {author && <span className="text-sm">por {author}</span>}

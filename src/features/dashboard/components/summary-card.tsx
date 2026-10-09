@@ -47,7 +47,7 @@ export function SummaryCard({
           <span className="text-3xl font-semibold tabular-nums">
             {text.value}
           </span>
-          <span className="text-base">{text.unit}</span>
+          {text.unit && <span className="text-base">{text.unit}</span>}
         </span>
         {text.details.map((detail) => (
           <span key={detail} className="text-sm text-muted-foreground">
