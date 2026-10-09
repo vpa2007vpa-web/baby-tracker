@@ -4,17 +4,14 @@ import { WifiOff } from "lucide-react";
 import { useRef, useState, useTransition, type ReactNode } from "react";
 import { toast } from "sonner";
 
-import {
-  createDiaperChange,
-  deleteDiaperChange,
-} from "@/features/diapers/actions";
+import { createDiaperChange } from "@/features/diapers/actions";
 import { DIAPER_TYPE_ICONS } from "@/features/diapers/components/diaper-type-icons";
+import { offerUndo } from "@/features/diapers/components/offer-undo";
 import { DIAPER_TYPE_LABELS } from "@/features/diapers/labels";
 import type { DiaperType } from "@/generated/prisma/enums";
 import { useOnlineStatus } from "@/lib/use-online-status";
 
 const QUICK_TYPES: readonly DiaperType[] = ["WET", "DIRTY", "MIXED"];
-const UNDO_DURATION_MS = 6000;
 
 /**
  * One tap logs a diaper now (CLAUDE.md §2.4, §4.2); color and texture can be
@@ -30,17 +27,6 @@ export function QuickDiaperButtons({ babyId }: { babyId: string }): ReactNode {
   const isSavingRef = useRef(false);
   const isOnline = useOnlineStatus();
 
-  function undo(id: string): void {
-    startTransition(async () => {
-      const result = await deleteDiaperChange({ id });
-      if (result.ok) {
-        toast.success("Pañal borrado");
-      } else {
-        toast.error("No hemos podido deshacerlo. Bórralo desde el historial.");
-      }
-    });
-  }
-
   function record(type: DiaperType): void {
     if (isSavingRef.current) return;
     isSavingRef.current = true;
@@ -51,12 +37,9 @@ export function QuickDiaperButtons({ babyId }: { babyId: string }): ReactNode {
       try {
         const result = await createDiaperChange({ id, babyId, type });
         if (result.ok) {
-          toast.success(
+          offerUndo(
             `Pañal ${DIAPER_TYPE_LABELS[type].toLowerCase()} guardado`,
-            {
-              duration: UNDO_DURATION_MS,
-              action: { label: "Deshacer", onClick: () => undo(id) },
-            },
+            id,
           );
         } else {
           toast.error(result.error.message);
