@@ -211,24 +211,35 @@ export function formatElapsed(durationMs: number): string {
   return `${hours}:${String(minutes).padStart(2, "0")}:${seconds}`;
 }
 
+/** A day's history: the plain path for today, so it stays shareable. */
+export function dayHref(basePath: string, date: string, today: string): string {
+  return date === today ? basePath : `${basePath}?day=${date}`;
+}
+
 /**
- * DayNav links of a `?day=` history: the day before, and the day after
- * unless it is today. Today is the plain path, so it stays shareable.
+ * DayNav props of a `?day=` history: the day before, the day after unless
+ * it is today, and what its date picker needs (never a future day).
  */
-export function dayNavHrefs(
+export function dayNavProps(
   basePath: string,
   day: CalendarDay,
   now: Date,
   timeZone: string,
-): { previousHref: string; nextHref: string | null } {
-  const nextDate = addDaysToDate(day.date, 1);
+): {
+  previousHref: string;
+  nextHref: string | null;
+  basePath: string;
+  date: string;
+  maxDate: string;
+} {
   const today = formatDateInputValue(now, timeZone);
   return {
-    previousHref: `${basePath}?day=${addDaysToDate(day.date, -1)}`,
+    previousHref: dayHref(basePath, addDaysToDate(day.date, -1), today),
     nextHref: day.isToday
       ? null
-      : nextDate === today
-        ? basePath
-        : `${basePath}?day=${nextDate}`,
+      : dayHref(basePath, addDaysToDate(day.date, 1), today),
+    basePath,
+    date: day.date,
+    maxDate: today,
   };
 }

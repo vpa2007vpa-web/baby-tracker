@@ -21,7 +21,7 @@ import {
 import { suggestNextBreast } from "@/features/feeding/service";
 import { listHouseholdMembers } from "@/features/household/queries";
 import { authorLabel, authorNamesOf } from "@/lib/authors";
-import { dayNavHrefs, formatDayLabel, resolveDay } from "@/lib/dates";
+import { dayNavProps, formatDayLabel, resolveDay } from "@/lib/dates";
 import { env } from "@/lib/env";
 import { cn } from "@/lib/utils";
 
@@ -60,7 +60,7 @@ async function FeedingSection({
     getLastBreastFeeding(baby.id),
   ]);
   const authorNames = authorNamesOf(members);
-  const dayLinks = dayNavHrefs("/feeding", day, now, timeZone);
+  const dayLinks = dayNavProps("/feeding", day, now, timeZone);
 
   return (
     <div className="flex flex-1 flex-col gap-4">

@@ -19,7 +19,7 @@ import {
   listSleepSessionsByDay,
 } from "@/features/sleep/queries";
 import { authorLabel, authorNamesOf } from "@/lib/authors";
-import { dayNavHrefs, formatDayLabel, resolveDay } from "@/lib/dates";
+import { dayNavProps, formatDayLabel, resolveDay } from "@/lib/dates";
 import { env } from "@/lib/env";
 import { cn } from "@/lib/utils";
 
@@ -57,7 +57,7 @@ async function SleepSection({
     getActiveSleepSession(baby.id),
   ]);
   const authorNames = authorNamesOf(members);
-  const dayLinks = dayNavHrefs("/sleep", day, now, timeZone);
+  const dayLinks = dayNavProps("/sleep", day, now, timeZone);
 
   return (
     <div className="flex flex-1 flex-col gap-4">

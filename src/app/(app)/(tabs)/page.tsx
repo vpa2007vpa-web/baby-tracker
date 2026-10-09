@@ -27,7 +27,7 @@ import { MAX_HOUSEHOLD_MEMBERS } from "@/features/household/service";
 import { getActiveSleepSession } from "@/features/sleep/queries";
 import { authorLabel, authorNamesOf } from "@/lib/authors";
 import {
-  dayNavHrefs,
+  dayNavProps,
   formatDayLabel,
   formatShortDate,
   resolveDay,
@@ -81,7 +81,7 @@ async function TodaySection({
     <div className="flex flex-1 flex-col gap-4">
       <DayNav
         label={formatDayLabel(day, now, timeZone)}
-        {...dayNavHrefs("/", day, now, timeZone)}
+        {...dayNavProps("/", day, now, timeZone)}
       />
       {today && members.length < MAX_HOUSEHOLD_MEMBERS && <InvitePartnerCard />}
       <RunningTimers

@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import {
   addDaysToDate,
-  dayNavHrefs,
+  dayHref,
+  dayNavProps,
   elapsedMs,
   formatElapsed,
   formatDateInputValue,
@@ -276,33 +277,50 @@ describe("elapsedMs", () => {
   });
 });
 
-describe("dayNavHrefs", () => {
+describe("dayNavProps", () => {
   const NOW = new Date("2026-10-09T10:00:00Z");
 
-  it("has no next day on today", () => {
+  it("has no next day on today, and picks up to today", () => {
     expect(
-      dayNavHrefs("/sleep", resolveDay(undefined, NOW, MADRID), NOW, MADRID),
-    ).toEqual({ previousHref: "/sleep?day=2026-10-08", nextHref: null });
+      dayNavProps("/sleep", resolveDay(undefined, NOW, MADRID), NOW, MADRID),
+    ).toEqual({
+      previousHref: "/sleep?day=2026-10-08",
+      nextHref: null,
+      basePath: "/sleep",
+      date: "2026-10-09",
+      maxDate: "2026-10-09",
+    });
   });
 
   it("goes back to the plain path from yesterday", () => {
     expect(
-      dayNavHrefs("/sleep", resolveDay("2026-10-08", NOW, MADRID), NOW, MADRID),
-    ).toEqual({ previousHref: "/sleep?day=2026-10-07", nextHref: "/sleep" });
+      dayNavProps("/sleep", resolveDay("2026-10-08", NOW, MADRID), NOW, MADRID),
+    ).toMatchObject({
+      previousHref: "/sleep?day=2026-10-07",
+      nextHref: "/sleep",
+    });
   });
 
   it("keeps the day in the URL further back", () => {
     expect(
-      dayNavHrefs(
+      dayNavProps(
         "/feeding",
         resolveDay("2026-09-30", NOW, MADRID),
         NOW,
         MADRID,
       ),
-    ).toEqual({
+    ).toMatchObject({
       previousHref: "/feeding?day=2026-09-29",
       nextHref: "/feeding?day=2026-10-01",
+      date: "2026-09-30",
     });
+  });
+});
+
+describe("dayHref", () => {
+  it("is the plain path for today and ?day= otherwise", () => {
+    expect(dayHref("/", "2026-10-09", "2026-10-09")).toBe("/");
+    expect(dayHref("/", "2026-09-25", "2026-10-09")).toBe("/?day=2026-09-25");
   });
 });
 

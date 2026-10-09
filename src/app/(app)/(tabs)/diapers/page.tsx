@@ -16,7 +16,7 @@ import { listDiaperChangesByDay } from "@/features/diapers/queries";
 import { countDiaperChanges } from "@/features/diapers/service";
 import { listHouseholdMembers } from "@/features/household/queries";
 import { authorNamesOf } from "@/lib/authors";
-import { dayNavHrefs, formatDayLabel, resolveDay } from "@/lib/dates";
+import { dayNavProps, formatDayLabel, resolveDay } from "@/lib/dates";
 import { env } from "@/lib/env";
 import { cn } from "@/lib/utils";
 
@@ -53,7 +53,7 @@ async function DiapersSection({
     listHouseholdMembers(member.householdId),
   ]);
   const authorNames = authorNamesOf(members);
-  const dayLinks = dayNavHrefs("/diapers", day, now, timeZone);
+  const dayLinks = dayNavProps("/diapers", day, now, timeZone);
 
   return (
     <div className="flex flex-1 flex-col gap-4">
