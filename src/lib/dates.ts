@@ -149,6 +149,21 @@ export function formatRelativeDayTime(
   return `el ${format(new TZDate(instant, timeZone), "dd/MM")} a las ${time}`;
 }
 
+/**
+ * "9 oct", or "31 dic 2025" for another year: the dates of histories that
+ * span months (growth, health), in the household zone.
+ */
+export function formatShortDate(
+  instant: Date,
+  now: Date,
+  timeZone: string,
+): string {
+  const date = new TZDate(instant, timeZone);
+  const isThisYear =
+    date.getFullYear() === new TZDate(now, timeZone).getFullYear();
+  return format(date, isThisYear ? "d MMM" : "d MMM yyyy", { locale: es });
+}
+
 /** "25 min", "1 h", "1 h 20 min". Negative durations read as "0 min". */
 export function formatDuration(durationMs: number): string {
   const totalMinutes = Math.max(0, Math.floor(durationMs / MINUTE_MS));

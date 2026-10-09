@@ -10,6 +10,7 @@ import {
   formatDayLabel,
   formatDuration,
   formatRelativeDayTime,
+  formatShortDate,
   formatTime,
   formatTimeAgo,
   getDayRange,
@@ -302,5 +303,28 @@ describe("dayNavHrefs", () => {
       previousHref: "/feeding?day=2026-09-29",
       nextHref: "/feeding?day=2026-10-01",
     });
+  });
+});
+
+describe("formatShortDate", () => {
+  const NOW = new Date("2026-10-09T10:00:00Z");
+
+  it("leaves the year out within this year", () => {
+    expect(formatShortDate(new Date("2026-03-01T10:00:00Z"), NOW, MADRID)).toBe(
+      "1 mar",
+    );
+  });
+
+  it("adds the year to an older date", () => {
+    expect(formatShortDate(new Date("2025-12-31T10:00:00Z"), NOW, MADRID)).toBe(
+      "31 dic 2025",
+    );
+  });
+
+  it("reads the day in the household zone", () => {
+    // 23:30 UTC on Sep 30 is already Oct 1 in Madrid.
+    expect(formatShortDate(new Date("2026-09-30T23:30:00Z"), NOW, MADRID)).toBe(
+      "1 oct",
+    );
   });
 });
