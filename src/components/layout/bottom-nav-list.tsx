@@ -12,8 +12,11 @@ import { cn } from "@/lib/utils";
  */
 export function BottomNavList({
   activeId,
+  isOnTabPage = true,
 }: {
   activeId: NavItemId | null;
+  /** False on screens reached from Más: the tab is the current section. */
+  isOnTabPage?: boolean;
 }): ReactNode {
   return (
     <ul className="mx-auto grid h-(--bottom-nav-height) max-w-md grid-cols-5">
@@ -25,7 +28,9 @@ export function BottomNavList({
             {/* The whole cell is the tap target: about 72 × 64 px at 360 px. */}
             <Link
               href={item.href}
-              aria-current={isActive ? "page" : undefined}
+              aria-current={
+                isActive ? (isOnTabPage ? "page" : "true") : undefined
+              }
               className={cn(
                 "flex flex-1 flex-col items-center justify-center gap-1 text-xs font-medium text-muted-foreground outline-none focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:ring-inset",
                 isActive && "font-semibold text-foreground",

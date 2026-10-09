@@ -84,3 +84,20 @@ export function getActiveNavItem(segment: string | null): NavItemId | null {
   if (segment === null) return "today";
   return TAB_BY_SEGMENT[segment] ?? null;
 }
+
+const TAB_ROOT_SEGMENTS: ReadonlySet<string | null> = new Set([
+  null,
+  "feeding",
+  "diapers",
+  "sleep",
+  "more",
+]);
+
+/**
+ * Whether the segment is the page a tab links to. On a screen reached from
+ * Más (Crecimiento, Salud, Ajustes), Más is the current section but not the
+ * current page: aria-current="true" instead of "page".
+ */
+export function isTabRoot(segment: string | null): boolean {
+  return TAB_ROOT_SEGMENTS.has(segment);
+}
