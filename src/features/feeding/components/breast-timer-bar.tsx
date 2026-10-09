@@ -1,11 +1,11 @@
 "use client";
 
-import { WifiOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { toast } from "sonner";
 
 import { offerUndo } from "@/components/shared/offer-undo";
+import { StickyActionBar } from "@/components/shared/sticky-action-bar";
 import {
   deleteFeeding,
   startFeeding,
@@ -21,7 +21,6 @@ import { FEEDING_TYPE_LABELS } from "@/features/feeding/labels";
 import { type BreastSide, getOppositeBreast } from "@/features/feeding/service";
 import type { ActionError } from "@/lib/action-result";
 import { formatDuration } from "@/lib/dates";
-import { useFocusRecovery } from "@/lib/use-focus-recovery";
 import { useOnlineStatus } from "@/lib/use-online-status";
 import { useSingleFlight } from "@/lib/use-single-flight";
 
@@ -50,11 +49,6 @@ export function BreastTimerBar({
   const { isBusy, run } = useSingleFlight();
   const isOnline = useOnlineStatus();
   const isDisabled = isBusy || !isOnline;
-  // Starting or stopping swaps the bar's buttons.
-  const focusRecovery = useFocusRecovery<HTMLDivElement>(
-    !isDisabled,
-    running?.id ?? null,
-  );
 
   // The other parent may have started, stopped or deleted it meanwhile: show
   // why, then the current state.
@@ -105,20 +99,10 @@ export function BreastTimerBar({
   }
 
   return (
-    <div
-      {...focusRecovery}
-      data-sticky-actions
-      className="sticky bottom-[calc(var(--bottom-nav-height)_+_env(safe-area-inset-bottom))] z-10 -mx-4 mt-auto flex flex-col gap-2 border-t border-border bg-background px-4 py-3"
+    <StickyActionBar
+      areControlsEnabled={!isDisabled}
+      swapKey={running?.id ?? null}
     >
-      {!isOnline && (
-        <p
-          role="status"
-          className="flex items-center justify-center gap-2 text-sm text-muted-foreground"
-        >
-          <WifiOff aria-hidden className="size-5" />
-          Sin conexión. Conéctate para registrar.
-        </p>
-      )}
       {running ? (
         <RunningFeedingCard
           feeding={running}
@@ -134,6 +118,6 @@ export function BreastTimerBar({
           onStart={start}
         />
       )}
-    </div>
+    </StickyActionBar>
   );
 }

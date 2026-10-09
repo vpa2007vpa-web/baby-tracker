@@ -1,10 +1,10 @@
 "use client";
 
-import { WifiOff } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
 
 import { offerUndo } from "@/components/shared/offer-undo";
+import { StickyActionBar } from "@/components/shared/sticky-action-bar";
 import {
   createDiaperChange,
   deleteDiaperChange,
@@ -20,7 +20,7 @@ const QUICK_TYPES: readonly DiaperType[] = ["WET", "DIRTY", "MIXED"];
 /**
  * One tap logs a diaper now (CLAUDE.md §2.4, §4.2); color and texture can be
  * added later from the history. Sticky above the bottom bar, in the thumb
- * zone; data-sticky-actions lifts the toasts above it (globals.css).
+ * zone.
  */
 export function QuickDiaperButtons({ babyId }: { babyId: string }): ReactNode {
   const { isBusy, run } = useSingleFlight();
@@ -49,19 +49,7 @@ export function QuickDiaperButtons({ babyId }: { babyId: string }): ReactNode {
   }
 
   return (
-    <div
-      data-sticky-actions
-      className="sticky bottom-[calc(var(--bottom-nav-height)_+_env(safe-area-inset-bottom))] z-10 -mx-4 mt-auto flex flex-col gap-2 border-t border-border bg-background px-4 py-3"
-    >
-      {!isOnline && (
-        <p
-          role="status"
-          className="flex items-center justify-center gap-2 text-sm text-muted-foreground"
-        >
-          <WifiOff aria-hidden className="size-5" />
-          Sin conexión. Conéctate para registrar.
-        </p>
-      )}
+    <StickyActionBar areControlsEnabled={!isBusy && isOnline}>
       <div className="grid grid-cols-3 gap-2">
         {QUICK_TYPES.map((type) => {
           const Icon = DIAPER_TYPE_ICONS[type];
@@ -81,6 +69,6 @@ export function QuickDiaperButtons({ babyId }: { babyId: string }): ReactNode {
           );
         })}
       </div>
-    </div>
+    </StickyActionBar>
   );
 }
