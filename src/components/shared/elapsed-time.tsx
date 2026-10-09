@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import { elapsedMs, formatElapsed } from "@/lib/dates";
+import { useServerClock } from "@/lib/use-server-clock";
 import { cn } from "@/lib/utils";
 
 type ElapsedTimeProps = {
@@ -22,21 +23,7 @@ export function ElapsedTime({
   serverNow,
   className,
 }: ElapsedTimeProps): ReactNode {
-  const startedAtMs = Date.parse(startedAt);
-  const serverNowMs = Date.parse(serverNow);
-  // The first render, on the server and at hydration, uses the server's
-  // "now": the same markup on both sides, so no mismatch and no flicker.
-  const [clock, setClock] = useState({ deviceNowMs: serverNowMs, skewMs: 0 });
-
-  useEffect(() => {
-    // How far this device's clock runs behind the server's, so both
-    // parents' phones show the same time. Re-measured on every refresh.
-    const skewMs = serverNowMs - Date.now();
-    const intervalId = setInterval(() => {
-      setClock({ deviceNowMs: Date.now(), skewMs });
-    }, 1000);
-    return () => clearInterval(intervalId);
-  }, [serverNowMs]);
+  const nowMs = useServerClock(serverNow, 1000);
 
   return (
     // role="timer" is not announced on every tick (aria-live off).
@@ -45,7 +32,7 @@ export function ElapsedTime({
       aria-live="off"
       className={cn("tabular-nums", className)}
     >
-      {formatElapsed(elapsedMs(startedAtMs, clock.deviceNowMs, clock.skewMs))}
+      {formatElapsed(elapsedMs(Date.parse(startedAt), nowMs, 0))}
     </span>
   );
 }
