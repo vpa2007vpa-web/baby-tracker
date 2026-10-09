@@ -15,6 +15,8 @@ type RecordHistoryItemProps = {
   iconSurfaceClassName: string;
   title: ReactNode;
   details?: ReactNode;
+  /** An extra line that must stand out, e.g. a vaccine's reaction. */
+  note?: ReactNode;
   /** "Ana", "ti", or null when nobody is known (decision 057). */
   author: string | null;
   /** Its edit screen, or null when it cannot be edited (a running timer). */
@@ -34,6 +36,7 @@ export function RecordHistoryItem({
   iconSurfaceClassName,
   title,
   details,
+  note,
   author,
   href,
   labelClassName,
@@ -63,6 +66,9 @@ export function RecordHistoryItem({
           <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
             {details}
           </span>
+        )}
+        {note && (
+          <span className="flex items-start gap-1.5 text-sm">{note}</span>
         )}
         {author && (
           <span className="text-sm text-muted-foreground">por {author}</span>
