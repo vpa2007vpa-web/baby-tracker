@@ -35,29 +35,29 @@
 ## Tareas
 
 ### 0. Base compartida
-- [ ] 1. `refactor(ui): share the record history row`: `RecordHistoryItem`; migrar Pañales, Tomas y Sueño sin cambiar el marcado visible.
-- [ ] 2. `refactor(app): share author names and day navigation links`: `authorNamesOf` en `lib/authors.ts` y `dayNavHrefs` en `lib/dates.ts`, con tests.
-- [ ] 3. `feat(ui): add unit field`: `UnitField` (decimal, unidad en el nombre accesible).
+- [x] 1. `refactor(ui): share the record history row`: `RecordHistoryItem`; migrar Pañales, Tomas y Sueño sin cambiar el marcado visible.
+- [x] 2. `refactor(app): share author names and day navigation links`: `authorNamesOf` en `lib/authors.ts` y `dayNavHrefs` en `lib/dates.ts`, con tests.
+- [x] 3. `feat(ui): add unit field`: `UnitField` (decimal, unidad en el nombre accesible).
 
 ### 1. Crecimiento
-- [ ] 4. `feat(growth): add labels and formatting`: `formatWeight` («5,25 kg»), `formatLength` («56,5 cm»), conversión de g/mm a texto de formulario («5,25») y `describeWeightChange`, todo con tests (redondeo, coma y signo).
-- [ ] 5. `feat(growth): add the history screen`: `/growth` con la última medida destacada, el historial con autoría y la `StickyActionBar` «Añadir medida»; estado vacío.
-- [ ] 6. `feat(growth): add new, edit and delete screens`: `GrowthFields` (fecha y hora, peso, longitud, perímetro), error «Indica al menos una medida» bajo el peso, Deshacer, `DeleteRecordButton`.
+- [x] 4. `feat(growth): add labels and formatting`: `formatWeight` («5,25 kg»), `formatLength` («56,5 cm»), conversión de g/mm a texto de formulario («5,25») y `describeWeightChange`, todo con tests (redondeo, coma y signo).
+- [x] 5. `feat(growth): add the history screen`: `/growth` con la última medida destacada, el historial con autoría y la `StickyActionBar` «Añadir medida»; estado vacío.
+- [x] 6. `feat(growth): add new, edit and delete screens`: `GrowthFields` (fecha y hora, peso, longitud, perímetro), error «Indica al menos una medida» bajo el peso, Deshacer, `DeleteRecordButton`.
 
 ### 2. Salud
-- [ ] 7. `feat(health): add the recent medications query`: `listRecentMedications(babyId, 4)` con test de integración (orden, distintos, otra familia invisible).
-- [ ] 8. `feat(health): add labels`: tipo, unidades (ml · mg · gotas · inhalaciones), «2.ª dosis» y formato de dosis («2,5 ml»), con tests exhaustivos sobre los enums.
-- [ ] 9. `feat(health): add the history screen`: `/health` con icono y texto por tipo (`Syringe` / `Pill`), dosis, número de dosis y la reacción marcada con icono y texto («Reacción: fiebre»), nunca solo con color.
-- [ ] 10. `feat(health): add new, edit and delete screens`: `HealthFields` (tipo en `ChoiceGrid`, nombre, dosis y unidad juntas, `NumberStepper` de dosis solo en vacunas, fecha, reacción y notas), botones de medicamentos recientes en el alta, «Guardar vacuna» / «Guardar medicamento».
+- [x] 7. `feat(health): add the recent medications query`: `listRecentMedications(babyId, 4)` con test de integración (orden, distintos, otra familia invisible).
+- [x] 8. `feat(health): add labels`: tipo, unidades (ml · mg · gotas · inhalaciones), «2.ª dosis» y formato de dosis («2,5 ml»), con tests exhaustivos sobre los enums.
+- [x] 9. `feat(health): add the history screen`: `/health` con icono y texto por tipo (`Syringe` / `Pill`), dosis, número de dosis y la reacción marcada con icono y texto («Reacción: fiebre»), nunca solo con color.
+- [x] 10. `feat(health): add new, edit and delete screens`: `HealthFields` (tipo en `ChoiceGrid`, nombre, dosis y unidad juntas, `NumberStepper` de dosis solo en vacunas, fecha, reacción y notas), botones de medicamentos recientes en el alta, «Guardar vacuna» / «Guardar medicamento».
 
 ### 3. Ajustes
-- [ ] 11. `feat(household): remove a member and revoke invites`: `removeHouseholdMember` y `revokeHouseholdInvite` según las decisiones 6 y 7. Tests de integración: solo el OWNER, nunca a sí mismo, otra familia → `NOT_FOUND`, idempotencia, revocación de pendientes, expulsar y unirse a la vez → estado coherente. Prueba de mutación de la comprobación de rol.
-- [ ] 12. `feat(settings): add the family and appearance screen`: `/settings` con Familia (miembros, «tú», rol, invitación activa «hasta las 14:30» con «Anular código» o enlace a invitar), Expulsar (`AlertDialog` en rojo sólido), Apariencia (tema) y Cuenta (cerrar sesión).
+- [x] 11. `feat(household): remove a member and revoke invites`: `removeHouseholdMember` y `revokeHouseholdInvite` según las decisiones 6 y 7. Tests de integración: solo el OWNER, nunca a sí mismo, otra familia → `NOT_FOUND`, idempotencia, revocación de pendientes, expulsar y unirse a la vez → estado coherente. Prueba de mutación de la comprobación de rol.
+- [x] 12. `feat(settings): add the family and appearance screen`: `/settings` con Familia (miembros, «tú», rol, invitación activa «hasta las 14:30» con «Anular código» o enlace a invitar), Expulsar (`AlertDialog` en rojo sólido), Apariencia (tema) y Cuenta (cerrar sesión).
 
 ### 4. Cierre de la Fase 3
-- [ ] 13. `feat(app): add loading and not-found states to every segment`: `not-found.tsx` en `(tabs)` y `(auth)`; `loading.tsx` donde una página no tenga ya su `Suspense` con *skeleton*.
-- [ ] 14. `docs`: decisiones nuevas, este plan, casillas del README («Crecimiento», «Vacunas / Salud», «Ajustes», «Autoría», «Editar y borrar», «Estados»).
-- [ ] Tras el QA con dos sesiones: `design:accessibility-review` **global** (casilla «Revisión de accesibilidad»), `engineering:code-review`, `design:design-system`; correcciones y cierre de la Fase 3.
+- [x] 13. `feat(app): add loading and not-found states to every segment`: `not-found.tsx` en `(tabs)` y `(auth)`; `loading.tsx` donde una página no tenga ya su `Suspense` con *skeleton*.
+- [x] 14. `docs`: decisiones nuevas, este plan, casillas del README («Crecimiento», «Vacunas / Salud», «Ajustes», «Autoría», «Editar y borrar», «Estados»).
+- [ ] Tras el QA con dos sesiones *(Crecimiento y Salud: superado; Ajustes: pendiente)*: `design:accessibility-review` **global** (casilla «Revisión de accesibilidad»), `engineering:code-review`, `design:design-system`; correcciones y cierre de la Fase 3.
 
 ## Skills por tarea (regla 0.1)
 
