@@ -4,10 +4,12 @@ import { notFound } from "next/navigation";
 import { Suspense, type ReactNode } from "react";
 
 import { PageHeader } from "@/components/layout/page-header";
+import { DeleteRecordButton } from "@/components/shared/delete-record-button";
 import { FormSkeleton } from "@/components/shared/form-skeleton";
 import { buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { requireBaby } from "@/features/auth/session";
+import { deleteFeeding } from "@/features/feeding/actions";
 import { EditFeedingForm } from "@/features/feeding/components/edit-feeding-form";
 import { getFeeding } from "@/features/feeding/queries";
 import { listHouseholdMembers } from "@/features/household/queries";
@@ -112,7 +114,16 @@ async function EditFeedingSection({
                 notes: feeding.notes ?? "",
               }
         }
-      />
+      >
+        <DeleteRecordButton
+          id={feeding.id}
+          deleteAction={deleteFeeding}
+          returnHref={returnHref}
+          actionLabel="Borrar toma"
+          title="¿Borrar esta toma?"
+          successMessage="Toma borrada"
+        />
+      </EditFeedingForm>
     </>
   );
 }
