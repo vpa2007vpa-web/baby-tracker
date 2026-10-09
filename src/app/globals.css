@@ -181,3 +181,13 @@
     @apply font-sans;
   }
 }
+
+/*
+ * CLAUDE.md §4.4: respect reduced motion. Unlayered, so it wins over the
+ * Tailwind utility: skeletons stay still instead of pulsing.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse {
+    animation: none;
+  }
+}
