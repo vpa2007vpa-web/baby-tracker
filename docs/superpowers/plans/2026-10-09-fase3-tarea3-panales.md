@@ -34,7 +34,7 @@
 - [x] 9. `feat(diapers): delete from the edit screen`
 - [x] 10. `feat(app): add not-found for task screens`
 - [x] 11. `docs`: decisiones 056–057 y este plan
-- [ ] Tras el QA visual: revisión de accesibilidad y de código, y "Pañales" marcado en el roadmap.
+- [x] Tras el QA visual: revisión de accesibilidad (confirmación de borrado a 4,5:1, nombres de los atajos de hora), del sistema de diseño (guarda de los tokens `--stool-*`) y de código, y "Pañales" marcado en el roadmap.
 
 ## Verificación
 
