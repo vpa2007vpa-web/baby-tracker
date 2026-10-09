@@ -7,3 +7,7 @@ CREATE OR REPLACE FUNCTION private.auth_uid() RETURNS uuid
   LANGUAGE sql STABLE AS 'SELECT NULL::uuid';
 CREATE OR REPLACE FUNCTION private.add_table_to_realtime(target regclass) RETURNS void
   LANGUAGE plpgsql AS 'BEGIN END';
+CREATE OR REPLACE FUNCTION private.broadcast_household_change() RETURNS trigger
+  LANGUAGE plpgsql AS 'BEGIN RETURN NULL; END';
+CREATE OR REPLACE FUNCTION private.remove_table_from_realtime(target regclass) RETURNS void
+  LANGUAGE plpgsql AS 'BEGIN END';
