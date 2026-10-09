@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { Prisma } from "@/generated/prisma/client";
+import type { DoseUnit, Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
 import { isUuid } from "@/lib/records";
 
@@ -9,6 +9,11 @@ import { isUuid } from "@/lib/records";
 
 /** Vaccines and occasional medicines: far below this cap in the MVP's span. */
 const HISTORY_LIMIT = 100;
+
+/** How many recent medications the new form offers to repeat. */
+const RECENT_MEDICATIONS = 4;
+/** Enough rows to find four distinct names among repeated doses. */
+const RECENT_MEDICATIONS_SCAN = 50;
 
 const HEALTH_RECORD_SELECT = {
   id: true,
@@ -50,4 +55,36 @@ export async function getHealthRecord(
     where: { id, babyId },
     select: HEALTH_RECORD_SELECT,
   });
+}
+
+export type RecentMedication = {
+  /** As last typed, without surrounding spaces. */
+  name: string;
+  doseAmount: number | null;
+  doseUnit: DoseUnit | null;
+};
+
+/**
+ * The last dose of each recently given medication, newest first, for the
+ * one-tap repeat of the new form (§4.2). Names are compared ignoring case
+ * and spaces: "Apiretal" and "apiretal " are the same medicine. Reads the
+ * latest rows by the (baby_id, administered_at) index and dedupes here.
+ */
+export async function listRecentMedications(
+  babyId: string,
+): Promise<RecentMedication[]> {
+  const records = await db.healthRecord.findMany({
+    where: { babyId, kind: "MEDICATION" },
+    orderBy: { administeredAt: "desc" },
+    take: RECENT_MEDICATIONS_SCAN,
+    select: { name: true, doseAmount: true, doseUnit: true },
+  });
+  const byName = new Map<string, RecentMedication>();
+  for (const record of records) {
+    const name = record.name.trim();
+    const key = name.toLocaleLowerCase("es");
+    if (!byName.has(key)) byName.set(key, { ...record, name });
+    if (byName.size === RECENT_MEDICATIONS) break;
+  }
+  return [...byName.values()];
 }

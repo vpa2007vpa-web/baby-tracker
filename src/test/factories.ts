@@ -4,6 +4,7 @@ import { getInviteExpiry, hashInviteCode } from "@/features/household/service";
 import type {
   BottleContent,
   DiaperType,
+  DoseUnit,
   FeedingType,
   HealthRecordKind,
   HouseholdRole,
@@ -192,6 +193,8 @@ export async function createHealthRecord(
     kind?: HealthRecordKind;
     name?: string;
     administeredAt?: Date;
+    doseAmount?: number;
+    doseUnit?: DoseUnit;
   },
 ): Promise<{ id: string }> {
   return db.healthRecord.create({
@@ -200,6 +203,8 @@ export async function createHealthRecord(
       kind: input.kind ?? "MEDICATION",
       name: input.name ?? "Vitamina D",
       administeredAt: input.administeredAt ?? minutesAgo(60),
+      doseAmount: input.doseAmount,
+      doseUnit: input.doseUnit,
       createdById: input.createdById,
     },
     select: { id: true },
