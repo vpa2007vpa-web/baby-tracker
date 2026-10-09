@@ -26,7 +26,7 @@ export function LinkCard({
   return (
     <Link
       href={href}
-      className="flex min-h-20 items-center gap-4 rounded-2xl border border-border bg-card p-4 transition-colors outline-none hover:bg-muted focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+      className="flex min-h-20 items-center gap-4 rounded-2xl border border-border bg-card p-4 transition-colors outline-none hover:bg-muted focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring"
     >
       <span
         className={cn(

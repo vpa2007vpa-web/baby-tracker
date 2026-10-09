@@ -94,3 +94,19 @@ describe.each([
     );
   });
 });
+
+// Focus indicators are non-text UI (WCAG 1.4.11): the ring around a focused
+// control, the bottom bar's tabs and the link cards included, needs 3:1
+// against the page.
+describe.each([
+  ["light", ":root"],
+  ["dark", ".dark"],
+])("focus ring (%s)", (_mode, selector) => {
+  const block = readBlock(selector);
+
+  it("stands out against the page", () => {
+    expect(contrast(block, "ring", "background")).toBeGreaterThanOrEqual(
+      WCAG_AA_NON_TEXT,
+    );
+  });
+});
