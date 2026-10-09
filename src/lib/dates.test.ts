@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   addDaysToDate,
+  dayNavHrefs,
   elapsedMs,
   formatElapsed,
   formatDateInputValue,
@@ -271,5 +272,35 @@ describe("elapsedMs", () => {
 
   it("is zero, not negative, when the clocks disagree the other way", () => {
     expect(elapsedMs(STARTED_AT, STARTED_AT - MINUTE, 0)).toBe(0);
+  });
+});
+
+describe("dayNavHrefs", () => {
+  const NOW = new Date("2026-10-09T10:00:00Z");
+
+  it("has no next day on today", () => {
+    expect(
+      dayNavHrefs("/sleep", resolveDay(undefined, NOW, MADRID), NOW, MADRID),
+    ).toEqual({ previousHref: "/sleep?day=2026-10-08", nextHref: null });
+  });
+
+  it("goes back to the plain path from yesterday", () => {
+    expect(
+      dayNavHrefs("/sleep", resolveDay("2026-10-08", NOW, MADRID), NOW, MADRID),
+    ).toEqual({ previousHref: "/sleep?day=2026-10-07", nextHref: "/sleep" });
+  });
+
+  it("keeps the day in the URL further back", () => {
+    expect(
+      dayNavHrefs(
+        "/feeding",
+        resolveDay("2026-09-30", NOW, MADRID),
+        NOW,
+        MADRID,
+      ),
+    ).toEqual({
+      previousHref: "/feeding?day=2026-09-29",
+      nextHref: "/feeding?day=2026-10-01",
+    });
   });
 });

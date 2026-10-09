@@ -28,3 +28,12 @@ export function describeAuthorship(
   const text = parts.join(" · ");
   return text ? text.charAt(0).toUpperCase() + text.slice(1) : undefined;
 }
+
+/** userId → display name, the lookup authorLabel reads (CLAUDE.md §4.4). */
+export function authorNamesOf(
+  members: readonly { userId: string; displayName: string }[],
+): Readonly<Record<string, string>> {
+  return Object.fromEntries(
+    members.map(({ userId, displayName }) => [userId, displayName]),
+  );
+}

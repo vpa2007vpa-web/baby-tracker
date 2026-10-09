@@ -15,7 +15,8 @@ import { describeDiaperCounts } from "@/features/diapers/labels";
 import { listDiaperChangesByDay } from "@/features/diapers/queries";
 import { countDiaperChanges } from "@/features/diapers/service";
 import { listHouseholdMembers } from "@/features/household/queries";
-import { addDaysToDate, formatDayLabel, resolveDay } from "@/lib/dates";
+import { authorNamesOf } from "@/lib/authors";
+import { dayNavHrefs, formatDayLabel, resolveDay } from "@/lib/dates";
 import { env } from "@/lib/env";
 import { cn } from "@/lib/utils";
 
@@ -51,25 +52,12 @@ async function DiapersSection({
     listDiaperChangesByDay(baby.id, day.range),
     listHouseholdMembers(member.householdId),
   ]);
-  const authorNames = Object.fromEntries(
-    members.map(({ userId, displayName }) => [userId, displayName]),
-  );
-  const nextDate = addDaysToDate(day.date, 1);
-  const today = resolveDay(undefined, now, timeZone).date;
+  const authorNames = authorNamesOf(members);
+  const dayLinks = dayNavHrefs("/diapers", day, now, timeZone);
 
   return (
     <div className="flex flex-1 flex-col gap-4">
-      <DayNav
-        label={formatDayLabel(day, now, timeZone)}
-        previousHref={`/diapers?day=${addDaysToDate(day.date, -1)}`}
-        nextHref={
-          day.isToday
-            ? null
-            : nextDate === today
-              ? "/diapers"
-              : `/diapers?day=${nextDate}`
-        }
-      />
+      <DayNav label={formatDayLabel(day, now, timeZone)} {...dayLinks} />
       {diapers.length > 0 ? (
         <>
           <p className="text-muted-foreground">

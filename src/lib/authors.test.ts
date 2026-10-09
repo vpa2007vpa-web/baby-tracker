@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { authorLabel, describeAuthorship } from "@/lib/authors";
+import { authorLabel, authorNamesOf, describeAuthorship } from "@/lib/authors";
 
 const NAMES = { "user-ana": "Ana", "user-luis": "Luis" };
 
@@ -32,5 +32,16 @@ describe("describeAuthorship", () => {
 
   it("says nothing when nobody is known", () => {
     expect(describeAuthorship(null, null)).toBeUndefined();
+  });
+});
+
+describe("authorNamesOf", () => {
+  it("maps each member's id to the name the household sees", () => {
+    expect(
+      authorNamesOf([
+        { userId: "user-ana", displayName: "Ana" },
+        { userId: "user-luis", displayName: "Luis" },
+      ]),
+    ).toEqual(NAMES);
   });
 });

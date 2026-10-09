@@ -18,8 +18,8 @@ import {
   getActiveSleepSession,
   listSleepSessionsByDay,
 } from "@/features/sleep/queries";
-import { authorLabel } from "@/lib/authors";
-import { addDaysToDate, formatDayLabel, resolveDay } from "@/lib/dates";
+import { authorLabel, authorNamesOf } from "@/lib/authors";
+import { dayNavHrefs, formatDayLabel, resolveDay } from "@/lib/dates";
 import { env } from "@/lib/env";
 import { cn } from "@/lib/utils";
 
@@ -56,25 +56,12 @@ async function SleepSection({
     listHouseholdMembers(member.householdId),
     getActiveSleepSession(baby.id),
   ]);
-  const authorNames = Object.fromEntries(
-    members.map(({ userId, displayName }) => [userId, displayName]),
-  );
-  const nextDate = addDaysToDate(day.date, 1);
-  const today = resolveDay(undefined, now, timeZone).date;
+  const authorNames = authorNamesOf(members);
+  const dayLinks = dayNavHrefs("/sleep", day, now, timeZone);
 
   return (
     <div className="flex flex-1 flex-col gap-4">
-      <DayNav
-        label={formatDayLabel(day, now, timeZone)}
-        previousHref={`/sleep?day=${addDaysToDate(day.date, -1)}`}
-        nextHref={
-          day.isToday
-            ? null
-            : nextDate === today
-              ? "/sleep"
-              : `/sleep?day=${nextDate}`
-        }
-      />
+      <DayNav label={formatDayLabel(day, now, timeZone)} {...dayLinks} />
       {sessions.length > 0 ? (
         <>
           <p className="text-muted-foreground">

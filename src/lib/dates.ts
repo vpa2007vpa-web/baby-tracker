@@ -195,3 +195,25 @@ export function formatElapsed(durationMs: number): string {
   if (hours === 0) return `${minutes}:${seconds}`;
   return `${hours}:${String(minutes).padStart(2, "0")}:${seconds}`;
 }
+
+/**
+ * DayNav links of a `?day=` history: the day before, and the day after
+ * unless it is today. Today is the plain path, so it stays shareable.
+ */
+export function dayNavHrefs(
+  basePath: string,
+  day: CalendarDay,
+  now: Date,
+  timeZone: string,
+): { previousHref: string; nextHref: string | null } {
+  const nextDate = addDaysToDate(day.date, 1);
+  const today = formatDateInputValue(now, timeZone);
+  return {
+    previousHref: `${basePath}?day=${addDaysToDate(day.date, -1)}`,
+    nextHref: day.isToday
+      ? null
+      : nextDate === today
+        ? basePath
+        : `${basePath}?day=${nextDate}`,
+  };
+}

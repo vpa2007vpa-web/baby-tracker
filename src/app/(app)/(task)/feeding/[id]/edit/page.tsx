@@ -13,7 +13,7 @@ import { deleteFeeding } from "@/features/feeding/actions";
 import { EditFeedingForm } from "@/features/feeding/components/edit-feeding-form";
 import { getFeeding } from "@/features/feeding/queries";
 import { listHouseholdMembers } from "@/features/household/queries";
-import { authorLabel, describeAuthorship } from "@/lib/authors";
+import { authorLabel, authorNamesOf, describeAuthorship } from "@/lib/authors";
 import {
   formatDateInputValue,
   formatDateTimeLocalValue,
@@ -69,9 +69,7 @@ async function EditFeedingSection({
   }
 
   const timeZone = env.APP_TIMEZONE;
-  const names = Object.fromEntries(
-    members.map(({ userId, displayName }) => [userId, displayName]),
-  );
+  const names = authorNamesOf(members);
   // Back to the history of the feeding's own day.
   const day = formatDateInputValue(feeding.startedAt, timeZone);
   const returnHref =

@@ -20,8 +20,8 @@ import {
 } from "@/features/feeding/queries";
 import { suggestNextBreast } from "@/features/feeding/service";
 import { listHouseholdMembers } from "@/features/household/queries";
-import { authorLabel } from "@/lib/authors";
-import { addDaysToDate, formatDayLabel, resolveDay } from "@/lib/dates";
+import { authorLabel, authorNamesOf } from "@/lib/authors";
+import { dayNavHrefs, formatDayLabel, resolveDay } from "@/lib/dates";
 import { env } from "@/lib/env";
 import { cn } from "@/lib/utils";
 
@@ -59,25 +59,12 @@ async function FeedingSection({
     getActiveFeeding(baby.id),
     getLastBreastFeeding(baby.id),
   ]);
-  const authorNames = Object.fromEntries(
-    members.map(({ userId, displayName }) => [userId, displayName]),
-  );
-  const nextDate = addDaysToDate(day.date, 1);
-  const today = resolveDay(undefined, now, timeZone).date;
+  const authorNames = authorNamesOf(members);
+  const dayLinks = dayNavHrefs("/feeding", day, now, timeZone);
 
   return (
     <div className="flex flex-1 flex-col gap-4">
-      <DayNav
-        label={formatDayLabel(day, now, timeZone)}
-        previousHref={`/feeding?day=${addDaysToDate(day.date, -1)}`}
-        nextHref={
-          day.isToday
-            ? null
-            : nextDate === today
-              ? "/feeding"
-              : `/feeding?day=${nextDate}`
-        }
-      />
+      <DayNav label={formatDayLabel(day, now, timeZone)} {...dayLinks} />
       {feedings.length > 0 ? (
         <>
           <p className="text-muted-foreground">

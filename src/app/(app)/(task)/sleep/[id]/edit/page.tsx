@@ -13,7 +13,7 @@ import { listHouseholdMembers } from "@/features/household/queries";
 import { deleteSleepSession } from "@/features/sleep/actions";
 import { EditSleepForm } from "@/features/sleep/components/edit-sleep-form";
 import { getSleepSession } from "@/features/sleep/queries";
-import { authorLabel, describeAuthorship } from "@/lib/authors";
+import { authorLabel, authorNamesOf, describeAuthorship } from "@/lib/authors";
 import {
   formatDateInputValue,
   formatDateTimeLocalValue,
@@ -69,9 +69,7 @@ async function EditSleepSection({
   }
 
   const timeZone = env.APP_TIMEZONE;
-  const names = Object.fromEntries(
-    members.map(({ userId, displayName }) => [userId, displayName]),
-  );
+  const names = authorNamesOf(members);
   // Back to the history of the day the siesta began.
   const day = formatDateInputValue(session.startedAt, timeZone);
   const returnHref =

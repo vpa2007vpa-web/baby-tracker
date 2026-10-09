@@ -11,7 +11,7 @@ import { deleteDiaperChange } from "@/features/diapers/actions";
 import { EditDiaperForm } from "@/features/diapers/components/edit-diaper-form";
 import { getDiaperChange } from "@/features/diapers/queries";
 import { listHouseholdMembers } from "@/features/household/queries";
-import { authorLabel, describeAuthorship } from "@/lib/authors";
+import { authorLabel, authorNamesOf, describeAuthorship } from "@/lib/authors";
 import {
   formatDateInputValue,
   formatDateTimeLocalValue,
@@ -44,9 +44,7 @@ async function EditDiaperSection({
   if (!diaper) notFound();
 
   const timeZone = env.APP_TIMEZONE;
-  const names = Object.fromEntries(
-    members.map(({ userId, displayName }) => [userId, displayName]),
-  );
+  const names = authorNamesOf(members);
   // Back to the history of the diaper's own day.
   const day = formatDateInputValue(diaper.occurredAt, timeZone);
   const returnHref =
