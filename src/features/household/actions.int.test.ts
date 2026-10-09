@@ -372,7 +372,8 @@ describe("removeHouseholdMember", () => {
   });
 
   it("never touches another household's member", async () => {
-    const family = await familyWithPartner();
+    // Signed in as the OWNER of a household of their own.
+    await familyWithPartner();
     const other = await createFamily();
     const { userId: stranger } = await createMember(other.householdId, {
       role: "MEMBER",
