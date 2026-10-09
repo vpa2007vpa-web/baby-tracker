@@ -15,7 +15,7 @@
 | Pieza | Estado |
 |---|---|
 | Resumen diario | `getDailySummary(babyId, day, now)` en `features/dashboard/queries.ts` y `summarizeDay` / `summarizeFeedings` / `summarizeSleep` puros y probados (decisión 053). |
-| Queries para «Hoy» | `getActiveFeeding`, `getActiveSleepSession`, `getLastBreastFeeding`, `getLastBottleFeeding` existen. **Falta** `getLastFeeding` (la última de cualquier tipo, con su autor). |
+| Queries para «Hoy» | `getActiveFeeding`, `getActiveSleepSession`, `getLastFeeding`, `getLastBreastFeeding` y `getLastBottleFeeding` existen. *(Corregido el 2026-10-09: `getLastFeeding` ya existía; le faltaba el test de aislamiento.)* |
 | Pantalla «Hoy» | `(tabs)/page.tsx` es un marcador: saludo, tarjeta de invitación y «El resumen del día, muy pronto». |
 | Tiempo relativo | `formatTimeAgo` existe; falta el componente cliente que lo repinte (§2.5). `ElapsedTime` ya resuelve el primer pintado con la hora del servidor. |
 | Realtime en la BD | Las 6 tablas del bebé están en `supabase_realtime` (`private.add_table_to_realtime`, decisión 027), con RLS `SELECT` para `authenticated` vía `is_household_member` (decisión 029). |
@@ -50,7 +50,7 @@ Recomiendo **B**: son datos de salud de un menor (§5), el proyecto de producci�
 
 ## 3. Bloque 0 — Cierre de la Fase 3 e integraciones (antes de A)
 
-- [ ] 0.1 QA del usuario de **Ajustes** (`/settings`: miembros, Expulsar, Anular código y tema) y de la **revisión global de accesibilidad** en el navegador. Después, marcar las 2 casillas que quedan y la **Fase 3 como terminada**.
+- [x] 0.1 QA del usuario de **Ajustes** (`/settings`: miembros, Expulsar, Anular código y tema) y de la **revisión global de accesibilidad** en el navegador. Después, marcar las 2 casillas que quedan y la **Fase 3 como terminada**.
 - [ ] 0.2 Integrar la rama `claude/sweet-chatterjee-51ffcd` (`requireBaby()` falla en voz alta): revisar, renumerar su decisión al siguiente número libre y pasar `npm test`.
 - [ ] 0.3 Integrar la tarea en segundo plano de fallos de red en las Server Actions, si ha terminado: revisión, decisión y `npm test`.
 
@@ -69,12 +69,12 @@ Recomiendo **B**: son datos de salud de un menor (§5), el proyecto de producci�
 **Rendimiento:** todas las lecturas van en un solo `Promise.all` dentro de `<Suspense>` con *skeleton*. El objetivo es menos de 1,5 s en 4G (criterio de salida), medido con Lighthouse en el bloque C.
 
 ### Tareas
-- [ ] A1. `feat(feeding): add the last feeding query`: `getLastFeeding(babyId)` (cualquier tipo, con `createdById`), con test de integración (orden, aislamiento entre bebés y prueba de mutación del filtro).
-- [ ] A2. `feat(ui): add a ticking time-ago`: `TimeAgo` en `components/shared` (primer pintado con `serverNow`, como `ElapsedTime`; repinta cada 30 s, con limpieza), apoyado en una función pura con test.
-- [ ] A3. `feat(dashboard): add labels`: textos de las tarjetas (`describeFeedingTotals`, `describeDiapers`, `describeSleepTotal`) con tests (plurales, ceros, `MIXED`). Pasa por `design:ux-copy`.
-- [ ] A4. `feat(dashboard): add the summary cards`: `features/dashboard/components/*` (tarjeta enlace por módulo, última toma y cronómetros en curso), en Server Components salvo `TimeAgo` y `ElapsedTime`.
-- [ ] A5. `feat(dashboard): add the today screen`: `(tabs)/page.tsx` con `requireBaby`, `?day=` y `DayNav`, lecturas en paralelo, *skeleton* y estados vacíos («Aún no hay nada hoy» con accesos a cada registro).
-- [ ] A6. `docs`: decisión del dashboard y casillas «Dashboard» y «Navegación entre días».
+- [x] A1. `test(feeding): keep another baby out of the last feeding`: *`getLastFeeding` ya existía (el análisis del punto 1 lo daba por ausente); se añadió el test de aislamiento entre bebés con su prueba de mutación.*
+- [x] A2. `feat(ui): add a ticking time-ago`: `TimeAgo` en `components/shared` (primer pintado con `serverNow`, como `ElapsedTime`; repinta cada 30 s, con limpieza), apoyado en una función pura con test.
+- [x] A3. `feat(dashboard): add labels`: textos de las tarjetas (`describeFeedingTotals`, `describeDiapers`, `describeSleepTotal`) con tests (plurales, ceros, `MIXED`). Pasa por `design:ux-copy`.
+- [x] A4. `feat(dashboard): add the summary cards`: `features/dashboard/components/*` (tarjeta enlace por módulo, última toma y cronómetros en curso), en Server Components salvo `TimeAgo` y `ElapsedTime`.
+- [x] A5. `feat(dashboard): add the today screen`: `(tabs)/page.tsx` con `requireBaby`, `?day=` y `DayNav`, lecturas en paralelo, *skeleton* y estados vacíos («Aún no hay nada hoy» con accesos a cada registro).
+- [x] A6. `docs`: decisión 065. *(Las casillas «Dashboard» y «Navegación entre días» del README se marcan tras la revisión del usuario.)*
 
 ## 5. Bloque B — Sincronización en tiempo real
 
