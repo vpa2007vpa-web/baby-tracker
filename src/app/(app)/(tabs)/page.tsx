@@ -1,4 +1,3 @@
-import { Baby, Milk, Moon, Ruler } from "lucide-react";
 import type { Metadata } from "next";
 import { Suspense, type ReactNode } from "react";
 
@@ -6,14 +5,9 @@ import { PageHeader } from "@/components/layout/page-header";
 import { DayNav } from "@/components/shared/day-nav";
 import { Skeleton } from "@/components/ui/skeleton";
 import { requireBaby } from "@/features/auth/session";
+import { DaySummary } from "@/features/dashboard/components/day-summary";
 import { LastFeedingCard } from "@/features/dashboard/components/last-feeding-card";
-import { RunningTimerCard } from "@/features/dashboard/components/running-timer-card";
-import { SummaryCard } from "@/features/dashboard/components/summary-card";
-import {
-  describeDiaperTotals,
-  describeFeedingTotals,
-  describeSleepTotals,
-} from "@/features/dashboard/labels";
+import { RunningTimers } from "@/features/dashboard/components/running-timers";
 import { getDailySummary } from "@/features/dashboard/queries";
 import {
   describeLastFeeding,
@@ -66,30 +60,22 @@ async function TodaySection({
     now,
     timeZone,
   );
-  // Past days show the summary only (decision D4).
+  // Past days show the summary only (decision D4); one parallel batch.
   const today = day.isToday;
-  const [
-    summary,
-    members,
-    lastFeeding,
-    lastBreast,
-    activeFeeding,
-    activeSleep,
-    latestGrowth,
-  ] = await Promise.all([
-    getDailySummary(baby.id, day.range, now),
-    listHouseholdMembers(member.householdId),
-    today ? getLastFeeding(baby.id) : null,
-    today ? getLastBreastFeeding(baby.id) : null,
-    today ? getActiveFeeding(baby.id) : null,
-    today ? getActiveSleepSession(baby.id) : null,
-    today ? getLatestGrowthMeasurement(baby.id) : null,
-  ]);
+  const [summary, members, last, lastBreast, feeding, sleep, growth] =
+    await Promise.all([
+      getDailySummary(baby.id, day.range, now),
+      listHouseholdMembers(member.householdId),
+      today ? getLastFeeding(baby.id) : null,
+      today ? getLastBreastFeeding(baby.id) : null,
+      today ? getActiveFeeding(baby.id) : null,
+      today ? getActiveSleepSession(baby.id) : null,
+      today ? getLatestGrowthMeasurement(baby.id) : null,
+    ]);
   const names = authorNamesOf(members);
+  const byWhom = (userId: string): string | null =>
+    authorLabel(userId, member.userId, names);
   const serverNow = now.toISOString();
-  const dayQuery = today ? "" : `?day=${day.date}`;
-  // The running feeding already has its own card.
-  const showLastFeeding = lastFeeding && lastFeeding.id !== activeFeeding?.id;
 
   return (
     <div className="flex flex-1 flex-col gap-4">
@@ -98,58 +84,35 @@ async function TodaySection({
         {...dayNavHrefs("/", day, now, timeZone)}
       />
       {today && members.length < MAX_HOUSEHOLD_MEMBERS && <InvitePartnerCard />}
-      {(activeFeeding || activeSleep) && (
-        <section
-          aria-labelledby="running-title"
-          className="flex flex-col gap-3"
-        >
-          <h2 id="running-title" className="text-lg font-semibold">
-            En curso
-          </h2>
-          {activeFeeding && activeFeeding.type !== "BOTTLE" && (
-            <RunningTimerCard
-              id={activeFeeding.id}
-              href="/feeding"
-              icon={Milk}
-              title={`${FEEDING_TYPE_LABELS[activeFeeding.type]} en curso`}
-              startedAt={activeFeeding.startedAt.toISOString()}
-              serverNow={serverNow}
-              startedBy={authorLabel(
-                activeFeeding.createdById,
-                member.userId,
-                names,
-              )}
-              surfaceClassName="bg-feeding-soft"
-              iconClassName="text-feeding"
-            />
-          )}
-          {activeSleep && (
-            <RunningTimerCard
-              id={activeSleep.id}
-              href="/sleep"
-              icon={Moon}
-              title="Durmiendo"
-              startedAt={activeSleep.startedAt.toISOString()}
-              serverNow={serverNow}
-              startedBy={authorLabel(
-                activeSleep.createdById,
-                member.userId,
-                names,
-              )}
-              surfaceClassName="bg-sleep-soft"
-              iconClassName="text-sleep"
-            />
-          )}
-        </section>
-      )}
-      {showLastFeeding && (
+      <RunningTimers
+        serverNow={serverNow}
+        feeding={
+          feeding && feeding.type !== "BOTTLE"
+            ? {
+                id: feeding.id,
+                label: FEEDING_TYPE_LABELS[feeding.type],
+                startedAt: feeding.startedAt.toISOString(),
+                startedBy: byWhom(feeding.createdById),
+              }
+            : null
+        }
+        sleep={
+          sleep && {
+            id: sleep.id,
+            startedAt: sleep.startedAt.toISOString(),
+            startedBy: byWhom(sleep.createdById),
+          }
+        }
+      />
+      {/* The running feeding already has its own card. */}
+      {last && last.id !== feeding?.id && (
         <LastFeedingCard
-          description={describeLastFeeding(lastFeeding)}
-          startedAt={lastFeeding.startedAt.toISOString()}
+          description={describeLastFeeding(last)}
+          startedAt={last.startedAt.toISOString()}
           serverNow={serverNow}
-          author={authorLabel(lastFeeding.createdById, member.userId, names)}
+          author={byWhom(last.createdById)}
           nextBreast={
-            activeFeeding
+            feeding
               ? null
               : FEEDING_TYPE_LABELS[
                   suggestNextBreast(lastBreast?.type ?? null)
@@ -157,51 +120,19 @@ async function TodaySection({
           }
         />
       )}
-      <section aria-labelledby="summary-title" className="flex flex-col gap-3">
-        <h2 id="summary-title" className="text-lg font-semibold">
-          {today ? "Resumen de hoy" : "Resumen del día"}
-        </h2>
-        <SummaryCard
-          href={`/feeding${dayQuery}`}
-          icon={Milk}
-          title="Tomas"
-          text={describeFeedingTotals(summary.feedings)}
-          iconSurfaceClassName="bg-feeding-soft"
-          iconClassName="text-feeding"
-        />
-        <SummaryCard
-          href={`/diapers${dayQuery}`}
-          icon={Baby}
-          title="Pañales"
-          text={describeDiaperTotals(summary.diapers)}
-          iconSurfaceClassName="bg-diapers-soft"
-          iconClassName="text-diapers"
-        />
-        <SummaryCard
-          href={`/sleep${dayQuery}`}
-          icon={Moon}
-          title="Sueño"
-          text={describeSleepTotals(summary.sleep)}
-          iconSurfaceClassName="bg-sleep-soft"
-          iconClassName="text-sleep"
-        />
-        {latestGrowth?.weightGrams != null && (
-          <SummaryCard
-            href="/growth"
-            icon={Ruler}
-            title="Crecimiento"
-            text={{
-              value: formatWeight(latestGrowth.weightGrams),
-              unit: "",
-              details: [
-                `Último peso, ${formatShortDate(latestGrowth.measuredAt, now, timeZone)}`,
-              ],
-            }}
-            iconSurfaceClassName="bg-growth-soft"
-            iconClassName="text-growth"
-          />
-        )}
-      </section>
+      <DaySummary
+        summary={summary}
+        isToday={today}
+        dayQuery={today ? "" : `?day=${day.date}`}
+        latestWeight={
+          growth?.weightGrams != null
+            ? {
+                value: formatWeight(growth.weightGrams),
+                detail: `Último peso, ${formatShortDate(growth.measuredAt, now, timeZone)}`,
+              }
+            : null
+        }
+      />
     </div>
   );
 }
