@@ -110,3 +110,17 @@ describe.each([
     );
   });
 });
+
+// Destructive actions ("Borrar pañal") are red text on the page.
+describe.each([
+  ["light", ":root"],
+  ["dark", ".dark"],
+])("destructive text (%s)", (_mode, selector) => {
+  const block = readBlock(selector);
+
+  it("is readable on the page", () => {
+    expect(contrast(block, "destructive", "background")).toBeGreaterThanOrEqual(
+      WCAG_AA_TEXT,
+    );
+  });
+});

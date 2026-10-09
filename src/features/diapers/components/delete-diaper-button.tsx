@@ -79,12 +79,13 @@ export function DeleteDiaperButton({
           <AlertDialogCancel className="h-12 text-base">
             Cancelar
           </AlertDialogCancel>
+          {/* Solid red: the tinted "destructive" variant gives its text only
+              3.99:1 in light mode (WCAG 1.4.3 asks 4.5:1). */}
           <AlertDialogAction
             type="button"
-            variant="destructive"
             disabled={isPending}
             onClick={remove}
-            className="h-12 text-base"
+            className="h-12 bg-destructive text-base text-background hover:bg-destructive/90"
           >
             {isPending ? "Borrando…" : "Borrar pañal"}
           </AlertDialogAction>
