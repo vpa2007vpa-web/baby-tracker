@@ -117,7 +117,7 @@ Server Action ─▶ PostgreSQL (fuente de verdad)
 - [x] B2. `feat(sync): add the connection status and debounced refresh`: funciones puras con test (estados, temporizadores falsos y un aviso doble en 300 ms → un solo refresco).
 - [x] B3. `feat(sync): add RealtimeSync`: cliente con canal privado, reconexión, limpieza en el desmontaje y `router.refresh()`; cargador en `(app)/layout.tsx`; se elimina `RefreshOnFocus`.
 - [x] B4. `feat(sync): add the connection indicator`: la franja de D3 en `(tabs)` y `(task)`, accesible y con movimiento reducido.
-- [ ] B5. `test(sync)`: QA con dos sesiones (dos usuarios de la familia de dev):
+- [x] B5. `test(sync)`: *(superada el 2026-10-10 con dos móviles)* QA con dos sesiones (dos usuarios de la familia de dev):
   - un registro en A aparece en B en menos de 2 s (cronometrado);
   - un borrado en A desaparece en B;
   - dos inicios de siesta simultáneos dan un registro y un aviso;

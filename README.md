@@ -246,6 +246,8 @@ baby-tracker/
 
 **Objetivo:** una pantalla de inicio útil de un vistazo y una app instalable que funcione con **varios clientes simultáneos**.
 
+**Estado:** dashboard, sincronización y despliegue terminados el 2026-10-10. Queda la **PWA** (manifiesto, *service worker*, metadatos de iOS e instalabilidad).
+
 > **Requisito de arquitectura de la PWA:** la app está diseñada para que varios clientes trabajen a la vez (ambos padres, cada uno con uno o más dispositivos) contra **una única fuente de verdad en la nube** (Supabase PostgreSQL).
 > - Ningún dispositivo guarda una copia propia de los datos que pueda divergir.
 > - Los cambios se propagan con Supabase Realtime.
@@ -254,19 +256,19 @@ baby-tracker/
 
 **Dashboard**
 
-- [ ] Dashboard "Hoy": última toma (hace cuánto, qué pecho y quién la registró), nº de tomas y ml totales, pañales mojados/sucios, horas de sueño, cronómetros activos y accesos rápidos a cada registro.
-- [ ] Navegación entre días (ayer / hoy) en el resumen.
+- [x] Dashboard "Hoy": última toma (hace cuánto, qué pecho y quién la registró), nº de tomas y ml totales, pañales mojados/sucios, horas de sueño, cronómetros activos y accesos rápidos a cada registro. *(Decisiones 065 y 067.)*
+- [x] Navegación entre días (ayer / hoy) en el resumen. *(Con `?day=` y selector de fecha nativo; decisión 067.)*
 
 **Sincronización en la nube (multi-cliente)**
 
-- [ ] `RealtimeSync` en el layout autenticado:
+- [x] `RealtimeSync` en el layout autenticado *(por Broadcast privado por familia, no `postgres_changes`: resuelve la limitación de los `DELETE`; decisión 066)*:
   - suscripción autenticada a los cambios de las tablas del bebé con Supabase Realtime;
   - al recibir un evento, `router.refresh()` con *debounce*;
   - los eventos `DELETE` no se pueden filtrar por `baby_id` (limitación de `postgres_changes`): suscribirse a ellos por separado o pasar a Broadcast (regla 2.8).
-- [ ] Reconexión robusta: al volver a primer plano (`visibilitychange`) o al recuperar la red (`online`), refrescar los datos y restablecer la suscripción. Los navegadores móviles cierran los WebSockets en segundo plano.
-- [ ] Indicador de estado de conexión (en línea · reconectando · sin conexión). Sin conexión, los botones de registro se deshabilitan con un mensaje claro: en el MVP no hay escritura offline.
-- [ ] Cronómetros compartidos: lo que inicia un progenitor lo ve en marcha, y lo puede parar, el otro.
-- [ ] Prueba con dos sesiones simultáneas (dos dispositivos o navegadores con usuarios distintos de la misma familia):
+- [x] Reconexión robusta: al volver a primer plano (`visibilitychange`) o al recuperar la red (`online`), refrescar los datos y restablecer la suscripción. Los navegadores móviles cierran los WebSockets en segundo plano.
+- [x] Indicador de estado de conexión (en línea · reconectando · sin conexión). Sin conexión, los botones de registro se deshabilitan con un mensaje claro: en el MVP no hay escritura offline.
+- [x] Cronómetros compartidos: lo que inicia un progenitor lo ve en marcha, y lo puede parar, el otro.
+- [x] Prueba con dos sesiones simultáneas (dos dispositivos o navegadores con usuarios distintos de la misma familia):
   - un registro en A aparece en B en menos de 2 s;
   - dos inicios de siesta simultáneos generan un solo registro;
   - los dobles toques no duplican nada.
@@ -280,9 +282,9 @@ baby-tracker/
 
 **Despliegue**
 
-- [ ] Vercel (u otra plataforma) con las funciones en una región de la UE próxima a Supabase.
-- [ ] Proyecto de Supabase **prod** en la UE, igual que dev: `prisma/platform/supabase-bootstrap.sql`, Data API desactivada, SMTP propio con `{{ .Token }}` en **las dos** plantillas, *Magic Link* y *Confirm signup* (un email nuevo recibe *Confirm signup*, porque `signInWithOtp` lo da de alta), y longitud del código OTP en 8.
-- [ ] Variables de entorno de producción (incluida `DATABASE_CA_CERT`) y `prisma migrate deploy` contra el proyecto **prod**, verificado vía MCP.
+- [ ] Vercel (u otra plataforma) con las funciones en una región de la UE próxima a Supabase. *(Desplegado en Vercel el 2026-10-10; falta confirmar que las funciones están en `cdg1`, París.)*
+- [x] *(Decisión 068: el proyecto existente, ya configurado así, es el de producción.)* Proyecto de Supabase **prod** en la UE, igual que dev: `prisma/platform/supabase-bootstrap.sql`, Data API desactivada, SMTP propio con `{{ .Token }}` en **las dos** plantillas, *Magic Link* y *Confirm signup* (un email nuevo recibe *Confirm signup*, porque `signInWithOtp` lo da de alta), y longitud del código OTP en 8.
+- [x] Variables de entorno de producción (incluida `DATABASE_CA_CERT`) y `prisma migrate deploy` contra el proyecto **prod**, verificado vía MCP. *(Variables introducidas por el usuario; 3 migraciones, los *triggers* y las particiones de mensajes verificados vía MCP el 2026-10-10.)*
 
 **Criterio de salida:**
 - La app se instala en Android e iOS y abre en modo *standalone*.
