@@ -129,6 +129,16 @@ describe("getLastFeeding and getLastBreastFeeding", () => {
     await expect(getLastFeeding(family.babyId)).resolves.toBeNull();
     await expect(getLastBreastFeeding(family.babyId)).resolves.toBeNull();
   });
+
+  it("never return a sibling's feeding", async () => {
+    // "Hoy" shows the last feeding with its author: never another baby's.
+    const family = await createFamily();
+    const sibling = await createBaby(family.householdId);
+    await createFeeding(sibling.babyId, { createdById: family.userId });
+
+    await expect(getLastFeeding(family.babyId)).resolves.toBeNull();
+    await expect(getLastBreastFeeding(family.babyId)).resolves.toBeNull();
+  });
 });
 
 describe("getFeeding", () => {
